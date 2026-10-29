@@ -1,0 +1,13 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // The website never talks to Firestore directly from the browser.
+    // All reads and writes go through Next.js server code using the Firebase
+    // Admin SDK, which bypasses these rules. Denying client access keeps the
+    // catalogue and client enquiries private.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

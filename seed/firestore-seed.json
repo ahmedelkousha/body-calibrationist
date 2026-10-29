@@ -1,0 +1,340 @@
+{
+  "services": [
+    {
+      "id": "svc-1",
+      "slug": "signature-holistic-massage",
+      "name": "Signature Holistic Massage",
+      "tagline": "Slow, intentional bodywork that releases what the week has held onto.",
+      "description": "A full-body massage blending Swedish, deep tissue and lymphatic techniques, tailored to how your body feels on the day.",
+      "longDescription": "Our signature treatment begins with a short consultation over herbal tea. Your therapist then works through the body at a pace that lets the nervous system catch up — warming oils, long flowing strokes and focused pressure where you carry tension.\n\nPressure is always guided by you. Many clients arrive wired and leave in a state of quiet that lasts for days.\n\n**Best for:** stress, poor sleep, tension headaches, recovery after travel or training.",
+      "duration": 75,
+      "price": 120,
+      "image": "/images/service-massage.webp",
+      "benefits": [
+        "Deep nervous-system reset",
+        "Improved circulation",
+        "Release of held tension",
+        "Better sleep quality"
+      ],
+      "featured": true,
+      "createdAt": "2026-05-02T14:27:43.859Z"
+    },
+    {
+      "id": "svc-2",
+      "slug": "bespoke-radiance-facial",
+      "name": "Bespoke Radiance Facial",
+      "tagline": "A facial built around your skin, not a menu.",
+      "description": "A fully personalised facial with cleansing, gentle exfoliation, lymphatic drainage and a layered mask matched to your skin's needs.",
+      "longDescription": "We begin with a skin reading under soft light, then build the treatment step by step: cleanse, exfoliate, extractions only where needed, a sculpting facial massage and a mask chosen for that day's skin.\n\nYou leave with visible luminosity and a simple plan for the weeks ahead — no twelve-step routine required.\n\n**Best for:** dullness, dehydration, congestion, special occasions.",
+      "duration": 60,
+      "price": 95,
+      "image": "/images/service-facial.webp",
+      "benefits": [
+        "Immediate glow",
+        "Balanced hydration",
+        "Gentler texture",
+        "A routine that fits your life"
+      ],
+      "featured": true,
+      "createdAt": "2026-05-12T14:27:43.859Z"
+    },
+    {
+      "id": "svc-3",
+      "slug": "advanced-skin-therapy",
+      "name": "Advanced Skin Therapy",
+      "tagline": "Considered, results-led care for skin that needs more.",
+      "description": "A course-based programme for pigmentation, acne, scarring or ageing concerns, combining clinical modalities with restorative aftercare.",
+      "longDescription": "This is a partnership rather than a single appointment. We map your skin over a 12-week arc, combining gentle peels, microneedling and LED with barrier-first home care.\n\nEvery plan is reviewed at each visit. Progress is photographed and measured, so you can see what is actually changing.\n\n**Best for:** pigmentation, acne, texture, fine lines, post-accident scarring.",
+      "duration": 90,
+      "price": 165,
+      "image": "/images/service-skin.webp",
+      "benefits": [
+        "Measured, visible progress",
+        "Barrier-first approach",
+        "Fewer products, used well",
+        "A clear 12-week plan"
+      ],
+      "featured": true,
+      "createdAt": "2026-06-01T14:27:43.859Z"
+    },
+    {
+      "id": "svc-4",
+      "slug": "seasonal-ritual",
+      "name": "Seasonal Ritual",
+      "tagline": "Two hours of warmth, scent and quiet, shaped by the season.",
+      "description": "Our slowest treatment: warm oil, gentle exfoliation, scalp work and a long, unhurried massage finished with tea.",
+      "longDescription": "The Seasonal Ritual changes with the year. In winter it leans into warmth and cedar; in summer, cool stone and citrus. What stays the same is the pace — two hours with nowhere else to be.\n\nIncludes a full-body exfoliation, warm oil massage, scalp and hand treatment, and a quiet rest with tea and something small to eat.\n\n**Best for:** deep rest, transitions, grief, burnout, celebrations.",
+      "duration": 120,
+      "price": 195,
+      "image": "/images/service-ritual.webp",
+      "benefits": [
+        "Two hours of uninterrupted quiet",
+        "Full-body softening",
+        "Scalp and hand care",
+        "Seasonal oils and tea"
+      ],
+      "featured": false,
+      "createdAt": "2026-07-01T14:27:43.859Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "prd-1",
+      "slug": "botanical-body-oil",
+      "name": "Botanical Body Oil",
+      "category": "Body",
+      "description": "A fast-absorbing blend of jojoba, sweet almond and camellia with neroli and cedarwood. The oil we use in the treatment room.",
+      "details": "100ml amber glass bottle with pump. Cold-pressed oils, no mineral oil, no synthetic fragrance. Use on damp skin after bathing or as a slow evening massage.\n\nIngredients: Simmondsia chinensis, Prunus amygdalus dulcis, Camellia oleifera, Citrus aurantium, Cedrus atlantica.",
+      "price": 48,
+      "stock": 34,
+      "image": "/images/product-oil.webp",
+      "featured": true,
+      "status": "active",
+      "createdAt": "2026-07-31T14:27:43.859Z"
+    },
+    {
+      "id": "prd-2",
+      "slug": "barrier-repair-serum",
+      "name": "Barrier Repair Serum",
+      "category": "Face",
+      "description": "A quiet, fragrance-free serum built on ceramides, niacinamide and beta-glucan to settle reactive skin.",
+      "details": "30ml frosted glass with dropper. Layers under moisturiser morning and night. Suitable during pregnancy.\n\nIngredients: Aqua, Niacinamide 4%, Ceramide NP, Sodium Hyaluronate, Beta-Glucan, Panthenol, Glycerin.",
+      "price": 62,
+      "compareAtPrice": 72,
+      "stock": 21,
+      "image": "/images/product-serum.webp",
+      "featured": true,
+      "status": "active",
+      "createdAt": "2026-08-10T14:27:43.859Z"
+    },
+    {
+      "id": "prd-3",
+      "slug": "evening-balm",
+      "name": "Evening Balm",
+      "category": "Face",
+      "description": "A balm-to-oil cleanser and overnight comfort layer in one. Melts makeup, leaves the barrier calm.",
+      "details": "60ml ceramic jar. Massage into dry skin, remove with a warm cloth. Also works as a thin overnight mask on dry patches.\n\nIngredients: Helianthus annuus, Butyrospermum parkii, Squalane, Calendula officinalis, Lavandula angustifolia.",
+      "price": 54,
+      "stock": 12,
+      "image": "/images/product-balm.webp",
+      "featured": false,
+      "status": "active",
+      "createdAt": "2026-08-20T14:27:43.859Z"
+    },
+    {
+      "id": "prd-4",
+      "slug": "rest-ritual-kit",
+      "name": "Rest Ritual Kit",
+      "category": "Sets",
+      "description": "Everything for a slow Sunday at home: body oil, evening balm, a cedar tea blend and a linen eye pillow.",
+      "details": "Gift-boxed set. Includes 100ml Botanical Body Oil, 60ml Evening Balm, 50g loose-leaf cedar and lemongrass tea, and a lavender-filled linen eye pillow.\n\nWrapped in recycled tissue with a hand-written card on request.",
+      "price": 138,
+      "compareAtPrice": 164,
+      "stock": 8,
+      "image": "/images/product-kit.webp",
+      "featured": true,
+      "status": "active",
+      "createdAt": "2026-08-30T14:27:43.859Z"
+    }
+  ],
+  "blogs": [
+    {
+      "id": "blg-1",
+      "slug": "why-your-skin-barrier-matters-more-than-any-serum",
+      "title": "Why your skin barrier matters more than any serum",
+      "excerpt": "If your skin stings, flakes and reacts to everything, the answer is almost never a stronger product. It is usually a quieter routine.",
+      "content": "Most of the skin concerns I see in the treatment room are not caused by a lack of products. They are caused by too many of them, used too often, in the name of doing something.\n\n## What the barrier actually is\n\nThe outermost layer of skin — the stratum corneum — is often described as a brick wall. Skin cells are the bricks, and between them sits a mortar of lipids, ceramides and cholesterol. When that mortar is intact, water stays in and irritants stay out.\n\nWhen it is compromised, everything feels like a lot: water stings, cream burns, and skin looks red and tight even when it is dry.\n\n## The usual culprits\n\n- Daily exfoliation with acids, sometimes twice\n- Hot showers and foaming cleansers\n- Retinoids started too fast, with no buffer\n- Layering five actives in one evening\n\n> Skin is not a problem to be solved. It is a system to be supported.\n\n## A quieter week\n\nIf your skin is in that reactive place, try seven days of this:\n\n1. A cream or balm cleanser, removed with lukewarm water.\n2. One hydrating serum, applied to damp skin.\n3. A moisturiser with ceramides, morning and night.\n4. SPF in the morning, every morning.\n5. Nothing else. No acids, no scrubs, no new products.\n\nMost people notice a real shift by day five. If things are still angry after two weeks, that is the point to book a skin consultation rather than buy another bottle.\n\n## What comes after\n\nOnce the barrier is calm, you can reintroduce one active — one — at a low frequency. Two nights a week, buffered over moisturiser, for a month before increasing. Slow is not a lack of ambition. It is how skin actually changes.",
+      "category": "Skin",
+      "author": "Shelley",
+      "readMinutes": 5,
+      "image": "/images/blog-1.webp",
+      "featured": true,
+      "status": "published",
+      "publishedAt": "2026-10-23T14:27:43.859Z",
+      "createdAt": "2026-10-23T14:27:43.859Z"
+    },
+    {
+      "id": "blg-2",
+      "slug": "the-case-for-slowing-down-your-evening",
+      "title": "The case for slowing down your evening",
+      "excerpt": "Sleep is not a switch. It is a slope, and most of us are trying to go from full speed to flat in four minutes.",
+      "content": "We talk about sleep hygiene as if it were a checklist: no screens, cool room, eight hours. All of that helps. But the piece most people skip is the transition — the twenty minutes where the body is told, gently, that the day is closing.\n\n## The nervous system needs a runway\n\nYour body shifts from sympathetic (alert) to parasympathetic (rest) through signals: warmth, dim light, slow breathing, familiar scent, the absence of decisions. Without those signals, you can lie in a dark room with your heart still at a hundred beats a minute.\n\n## Three things that work\n\n### Warmth, then cool\n\nA warm shower or bath an hour before bed, then a cool bedroom. The drop in core temperature is one of the strongest sleep signals we have.\n\n### Scent as a cue\n\nUse the same oil or balm each evening — on wrists, or a drop on the pillow. After two weeks the scent itself starts to do the work.\n\n### A low-stakes ritual\n\nNot journalling your life goals. Something small: five slow breaths, a stretch on the floor, one page of fiction. The point is repetition, not depth.\n\n> The goal is not to fall asleep faster. It is to stop arriving at bed already braced.\n\n## What to skip\n\nThe temptation is to add a supplement, then another. Before you do, give yourself two weeks of the same three cues, at the same time, and see what changes. Bodies respond to consistency far more than intensity.",
+      "category": "Wellbeing",
+      "author": "Shelley",
+      "readMinutes": 4,
+      "image": "/images/blog-2.webp",
+      "featured": true,
+      "status": "published",
+      "publishedAt": "2026-10-08T14:27:43.859Z",
+      "createdAt": "2026-10-08T14:27:43.859Z"
+    },
+    {
+      "id": "blg-3",
+      "slug": "what-happens-in-your-first-skin-consultation",
+      "title": "What actually happens in your first skin consultation",
+      "excerpt": "No pressure, no ten-step plan. Here is exactly how the first forty-five minutes go — and what you leave with.",
+      "content": "If you have never had a proper skin consultation, the idea can feel intimidating — as though you will be assessed and found wanting. It is the opposite. The whole point is to leave with fewer things to worry about, not more.\n\n## Before we begin\n\nCome with a clean face if you can, and bring the products you are currently using. Photographs of the labels are fine. Knowing what your skin has been through is more useful than any single product.\n\n## The conversation\n\nWe start with history: what has changed, what has been tried, what your skin does after a bad week. We talk about your cycle, your sleep, your work, because skin is not separate from any of it.\n\nThen we look — under daylight and under a lamp — at texture, hydration, pigmentation and barrier.\n\n## What you leave with\n\n- A short explanation of what your skin is doing and why\n- A routine of no more than four products\n- A realistic timeline, usually 8–12 weeks\n- A written plan, sent by email the same day\n\n## What we will not do\n\nWe will not sell you a course you do not need, and we will not promise you different skin in a week. What we can promise is honesty about what is achievable, and a plan that fits the life you actually have.",
+      "category": "Skin",
+      "author": "Shelley",
+      "readMinutes": 3,
+      "image": "/images/blog-3.webp",
+      "featured": false,
+      "status": "published",
+      "publishedAt": "2026-09-15T14:27:43.859Z",
+      "createdAt": "2026-09-15T14:27:43.859Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "evt-1",
+      "slug": "winter-reset-workshop",
+      "title": "Winter Reset Workshop",
+      "description": "An evening of breathwork, slow movement and guided rest, with tea and a take-home ritual card.",
+      "longDescription": "A small-group evening designed for the middle of winter. We begin with breathwork to settle the nervous system, move slowly through restorative postures, then finish with a long guided rest under blankets.\n\nTea and a small plate afterwards. You leave with a printed ritual card and a sample of our Seasonal Oil.\n\nLimited to 12 people. Mats, blankets and bolsters provided.",
+      "date": "2026-11-10",
+      "time": "6:30pm – 8:30pm",
+      "location": "The Studio, 14 Marine Parade",
+      "price": 65,
+      "capacity": 12,
+      "booked": 7,
+      "image": "/images/workshop.webp",
+      "status": "upcoming",
+      "createdAt": "2026-09-29T14:27:43.859Z"
+    },
+    {
+      "id": "evt-2",
+      "slug": "skin-literacy-masterclass",
+      "title": "Skin Literacy Masterclass",
+      "description": "Learn to read your own skin: ingredients, routines and the myths worth ignoring. Includes a bespoke mini-facial.",
+      "longDescription": "A practical, no-nonsense class for anyone overwhelmed by skincare. We cover how to read an ingredient list, which actives do what, and how to build a routine that survives a busy week.\n\nEach guest receives a skin reading and a 20-minute bespoke mini-facial during the session, plus a printed guide to take home.\n\nLimited to 10 people. Bring your current products if you would like them reviewed.",
+      "date": "2026-11-26",
+      "time": "11:00am – 1:30pm",
+      "location": "The Studio, 14 Marine Parade",
+      "price": 85,
+      "capacity": 10,
+      "booked": 4,
+      "image": "/images/service-skin.webp",
+      "status": "upcoming",
+      "createdAt": "2026-10-04T14:27:43.859Z"
+    },
+    {
+      "id": "evt-3",
+      "slug": "spring-open-studio",
+      "title": "Spring Open Studio",
+      "description": "A free morning of tasters, product testing and conversation. Come and see the space.",
+      "longDescription": "Twice a year we open the studio doors. Ten-minute tasters of the Signature Massage and Bespoke Facial, product testing, and a chance to ask anything you have been wondering about.\n\nNo booking required, though taster slots fill quickly. Tea and pastries from the bakery next door.",
+      "date": "2026-12-08",
+      "time": "9:00am – 12:00pm",
+      "location": "The Studio, 14 Marine Parade",
+      "price": 0,
+      "capacity": 40,
+      "booked": 18,
+      "image": "/images/blog-1.webp",
+      "status": "upcoming",
+      "createdAt": "2026-10-09T14:27:43.859Z"
+    }
+  ],
+  "stories": [
+    {
+      "id": "str-1",
+      "name": "Amelia R.",
+      "headline": "Twelve years of acne, and the first routine that held",
+      "quote": "I had spent so much money on being told my skin was the problem. Shelley looked at it and said the routine was. Twelve weeks later, I do not think about my face when I wake up.",
+      "service": "Advanced Skin Therapy",
+      "rating": 5,
+      "image": "/images/story-1.webp",
+      "featured": true,
+      "createdAt": "2026-09-19T14:27:43.859Z"
+    },
+    {
+      "id": "str-2",
+      "name": "Daniel K.",
+      "headline": "From burnout to actually sleeping",
+      "quote": "I booked one massage because my shoulders had stopped moving properly. I have been back every month since. It is the only hour in my calendar where nothing is expected of me.",
+      "service": "Signature Holistic Massage",
+      "rating": 5,
+      "image": "/images/story-2.webp",
+      "featured": true,
+      "createdAt": "2026-09-24T14:27:43.859Z"
+    },
+    {
+      "id": "str-3",
+      "name": "Priya M.",
+      "headline": "A wedding, and a face that felt like mine",
+      "quote": "I did not want to look like a different person — just well. That is exactly what happened. My mother cried, which is the highest review available in my family.",
+      "service": "Bespoke Radiance Facial",
+      "rating": 5,
+      "image": "/images/story-3.webp",
+      "featured": true,
+      "createdAt": "2026-10-14T14:27:43.859Z"
+    }
+  ],
+  "inquiries": [
+    {
+      "id": "inq-1",
+      "name": "Charlotte Hayes",
+      "email": "charlotte.hayes@example.com",
+      "phone": "+61 412 889 201",
+      "subject": "Booking a first massage",
+      "message": "Hi Shelley, I have been dealing with a lot of tension in my neck and shoulders from desk work. I have never had a massage before and wondered what you would recommend for a first visit. Ideally a Saturday morning if you have anything.",
+      "status": "new",
+      "notes": "",
+      "createdAt": "2026-10-29T09:39:43.859Z"
+    },
+    {
+      "id": "inq-2",
+      "name": "Marcus Bell",
+      "email": "marcus.bell@example.com",
+      "phone": "+61 403 221 774",
+      "subject": "Advanced skin therapy — pricing",
+      "message": "Hello, I am interested in the 12-week skin programme for some pigmentation from years of surfing. Could you tell me the total cost and whether it can be paid in instalments? Thanks.",
+      "status": "new",
+      "notes": "",
+      "createdAt": "2026-10-28T16:51:43.859Z"
+    },
+    {
+      "id": "inq-3",
+      "name": "Sophia Nguyen",
+      "email": "sophia.nguyen@example.com",
+      "phone": "",
+      "subject": "Rest Ritual Kit — in stock?",
+      "message": "I would love to buy the Rest Ritual Kit as a gift. Is it in stock at the moment, and can you include a hand-written card? It is for my sister who has just had a baby.",
+      "status": "read",
+      "notes": "Gift note available. Check stock Thursday.",
+      "createdAt": "2026-10-27T14:27:43.859Z"
+    },
+    {
+      "id": "inq-4",
+      "name": "Elena Petrova",
+      "email": "elena.petrova@example.com",
+      "phone": "+61 488 145 663",
+      "subject": "Private workshop for a small team",
+      "message": "We are a team of eight and would love a private version of the Winter Reset Workshop in early December. Is that something you offer, and what would it cost?",
+      "status": "replied",
+      "notes": "Quoted $520 for 8 people. Awaiting confirmation.",
+      "createdAt": "2026-10-24T14:27:43.859Z"
+    },
+    {
+      "id": "inq-5",
+      "name": "Tom Whitfield",
+      "email": "tom.whitfield@example.com",
+      "phone": "+61 422 337 918",
+      "subject": "Gift voucher",
+      "message": "Do you offer gift vouchers for the Seasonal Ritual? Looking for something for my partner's birthday.",
+      "status": "replied",
+      "notes": "Voucher link sent.",
+      "createdAt": "2026-10-20T14:27:43.859Z"
+    },
+    {
+      "id": "inq-6",
+      "name": "Aisha Rahman",
+      "email": "aisha.rahman@example.com",
+      "phone": "",
+      "subject": "Pregnancy-safe treatments",
+      "message": "I am 22 weeks pregnant and would love to know which treatments are suitable. Also whether the Barrier Repair Serum is safe to use.",
+      "status": "archived",
+      "notes": "Advised massage after 1st trimester; serum is pregnancy-safe.",
+      "createdAt": "2026-10-13T14:27:43.859Z"
+    }
+  ]
+}
