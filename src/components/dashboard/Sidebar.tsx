@@ -5,12 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { logoutAction } from "@/app/login/actions";
-
-export type SidebarUser = {
-  email: string | null;
-  name: string | null;
-};
+import { useAuth } from "./AuthProvider";
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: "M3.75 12 12 3.75 20.25 12M5.25 10.5V20.25h5.25v-5.25h3v5.25h5.25V10.5" },
@@ -27,18 +22,25 @@ const secondary = [
   { name: "Settings", href: "/dashboard/settings", icon: "M10.5 3.75h3l.4 2.2 2 .8 2-1.1 2.1 2.1-1.1 2 .8 2 2.2.4v3l-2.2.4-.8 2 1.1 2-2.1 2.1-2-1.1-2 .8-.4 2.2h-3l-.4-2.2-2-.8-2 1.1-2.1-2.1 1.1-2-.8-2-2.2-.4v-3l2.2-.4.8-2-1.1-2 2.1-2.1 2 1.1 2-.8.4-2.2Z" },
 ];
 
-export default function Sidebar({
-  newInquiries = 0,
-  user,
-}: {
-  newInquiries?: number;
-  user: SidebarUser;
-}) {
+export default function Sidebar({ newInquiries = 0 }: { newInquiries?: number }) {
   const pathname = usePathname();
+  const { user, signOutNow } = useAuth();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
-  const displayName = user.name || user.email?.split("@")[0] || "Studio";
+  const email = user?.email ?? null;
+  const displayName = user?.displayName || email?.split("@")[0] || "Studio";
   const initial = (displayName[0] || "S").toUpperCase();
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      // The dashboard gate sees the auth state change and redirects to /login.
+      await signOutNow();
+    } finally {
+      setSigningOut(false);
+    }
+  }
 
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
@@ -143,7 +145,7 @@ export default function Sidebar({
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm capitalize text-cream">{displayName}</p>
-              <p className="truncate text-[10px] text-cream/50">{user.email || "Signed in"}</p>
+              <p className="truncate text-[10px] text-cream/50">{email || "Signed in"}</p>
             </div>
           </div>
           <div className="mt-4 flex items-center justify-between gap-3">
@@ -153,14 +155,14 @@ export default function Sidebar({
             >
               View site
             </Link>
-            <form action={logoutAction}>
-              <button
-                type="submit"
-                className="rounded-full border border-cream/20 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-cream/70 transition hover:border-cream/50 hover:text-cream"
-              >
-                Sign out
-              </button>
-            </form>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="rounded-full border border-cream/20 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-cream/70 transition hover:border-cream/50 hover:text-cream disabled:opacity-60"
+            >
+              {signingOut ? "Signing out…" : "Sign out"}
+            </button>
           </div>
         </div>
       </aside>

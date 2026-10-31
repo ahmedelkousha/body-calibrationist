@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-import { readDb } from "@/lib/db";
-import type { Database } from "@/lib/types";
+import { readContent, type ContentDatabase } from "@/lib/firebase/data";
 
 const base = "https://shelleys.studio";
 
@@ -10,9 +9,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Firebase is the only data source. If credentials are not present (for
   // example during a build before .env.local is created), still publish the
   // static routes instead of failing the deployment.
-  let db: Database | null = null;
+  let db: ContentDatabase | null = null;
   try {
-    db = await readDb();
+    db = await readContent();
   } catch {
     db = null;
   }
@@ -21,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "",
     "/treatments",
     "/store",
-    "/blog",
+    "/blogs",
     "/approach",
     "/workshops",
     "/stories",
@@ -52,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogRoutes = (db?.blogs ?? [])
     .filter((post) => post.status === "published")
     .map((post) => ({
-      url: `${base}/blog/${post.slug}`,
+      url: `${base}/blogs/${post.slug}`,
       lastModified: new Date(post.publishedAt),
       changeFrequency: "monthly" as const,
       priority: 0.6,

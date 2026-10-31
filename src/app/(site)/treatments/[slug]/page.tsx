@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBySlug, readDb } from "@/lib/db";
+import { getBySlug, readCollection } from "@/lib/firebase/data";
 import { formatPrice, safeImage } from "@/lib/utils";
-import Markdown from "@/lib/markdown";
+import Markdown from "@/components/site/Markdown";
 import ServiceCard from "@/components/site/ServiceCard";
 
 export const dynamic = "force-dynamic";
@@ -27,8 +27,8 @@ export default async function ServicePage({ params }: Props) {
   const service = await getBySlug("services", slug);
   if (!service) notFound();
 
-  const db = await readDb();
-  const others = db.services.filter((item) => item.id !== service.id).slice(0, 3);
+  const services = await readCollection("services");
+  const others = services.filter((item) => item.id !== service.id).slice(0, 3);
 
   return (
     <>

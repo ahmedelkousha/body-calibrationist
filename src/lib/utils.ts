@@ -1,3 +1,19 @@
+import type { ResourceKey } from "./types";
+
+/** Collections whose list views read newest-first. */
+export const NEWEST_FIRST: ResourceKey[] = ["blogs", "inquiries"];
+
+export function sortByCreatedAt<T extends { createdAt?: string }>(
+  items: T[],
+  newestFirst: boolean,
+): T[] {
+  return [...items].sort((a, b) => {
+    const left = Date.parse(a.createdAt ?? "") || 0;
+    const right = Date.parse(b.createdAt ?? "") || 0;
+    return newestFirst ? right - left : left - right;
+  });
+}
+
 export function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }

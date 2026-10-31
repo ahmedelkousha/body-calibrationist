@@ -15,7 +15,7 @@ const columns = [
   {
     title: "Read",
     links: [
-      { name: "Journal", href: "/blog" },
+      { name: "Journal", href: "/blogs" },
       { name: "Our Approach", href: "/approach" },
       { name: "Reach Us", href: "/contact" },
       { name: "Dashboard", href: "/dashboard" },

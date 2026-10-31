@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { createInquiry } from "@/lib/firebase/data";
 
 const subjects = [
   "New client enquiry",
@@ -26,12 +27,7 @@ export default function ContactForm() {
     event.preventDefault();
     setStatus("sending");
     try {
-      const response = await fetch("/api/inquiries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, status: "new", notes: "" }),
-      });
-      if (!response.ok) throw new Error("failed");
+      await createInquiry({ ...form, notes: "" });
       setStatus("done");
       setForm({ name: "", email: "", phone: "", subject: subjects[0], message: "" });
     } catch {

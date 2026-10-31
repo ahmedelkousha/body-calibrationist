@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Content and the dashboard are backed by **Firebase** (Authentication + Firestore), so you need a project before the site can load content. Copy `.env.example` to `.env.local`, fill in the values, and run `npm run seed:firestore` — see [Authentication](#authentication) and [Data & storage](#data--storage). Without credentials, content pages return a “Firebase is not configured” error and `/dashboard` stays locked. There is no local database fallback.
+Content lives in **Cloud Firestore** and the dashboard is protected by **Firebase Authentication**, so you need a Firebase project before the site can load content. Copy `.env.example` to `.env.local`, fill in the values, and run `npm run seed:firestore` — see [Authentication](#authentication) and [Data & storage](#data--storage). Without credentials, content pages return a “Firebase is not configured” error and `/dashboard` stays locked. There is no local database fallback.
 
 Open **http://localhost:3000**.
 
@@ -35,7 +35,7 @@ Tailwind CSS v4 is compiled through PostCSS (`postcss.config.mjs` → `@tailwind
 | Home | `/` |
 | Treatments & Services | `/treatments` (+ `/treatments/[slug]`) |
 | Store | `/store` (+ `/store/[slug]`) |
-| Journal / Blog | `/blog` (+ `/blog/[slug]`) |
+| Journal / Blog | `/blogs` (+ `/blogs/[slug]`) |
 | Our Approach | `/approach` |
 | Workshops & Events | `/workshops` |
 | Transformation Stories | `/stories` |
@@ -66,29 +66,38 @@ SEO/GEO extras: per-page metadata, `sitemap.xml`, `robots.txt` (including AI cra
 - **Stories** — auto-rotating testimonial carousel with manual controls.
 - **Dashboard** — full create / edit / delete for every resource, search and status filters, enquiry status workflow (new → read → replied → archived) with notes, and stat cards.
 
+## Architecture
+
+Two different data paths, on purpose:
+
+- **Public pages are server-rendered.** `/`, `/treatments`, `/store`, `/blogs`, `/stories`, `/workshops`, `/contact` and `sitemap.xml` read Firestore on the Next.js server through the **Firebase Admin SDK**. This keeps SEO, page metadata and first paint intact; the Admin SDK bypasses `firestore.rules`.
+- **The dashboard runs entirely in the browser.** `/login` and `/dashboard/**` use the **Firebase Web SDK** — Auth for sign-in, Firestore for every read and write — authorised by [`firestore.rules`](firestore.rules).
+- **There are no `/api` routes.** Public forms write straight to Firestore as anonymous visitors under strict rules. There is no session cookie, no proxy guard and no server session to verify.
+
+This is the hybrid you asked for: the browser uses the Firebase client SDK where it belongs (the dashboard and public form writes), while Next.js still server-renders the marketing site.
+
 ## Authentication
 
-The dashboard is private. Sign-in uses **Firebase Authentication** (email & password) with Firebase Admin **session cookies**:
+Sign-in is **Firebase Authentication only** — no preview mode, shared password or local bypass.
 
-- `/login` signs in through the Identity Toolkit REST API, then exchanges the ID token for a five-day `__session` cookie.
-- `DASHBOARD_ALLOWED_EMAILS` restricts access to the studio account(s), even if someone creates another Firebase user with the project's public API key.
-- `src/proxy.ts` redirects anonymous requests for `/dashboard/*` to `/login`.
-- `src/app/dashboard/layout.tsx` verifies the cookie with the Firebase Admin SDK before rendering.
-- Dashboard API routes return `401` without a valid session. The only public write endpoint is `POST /api/inquiries`, used by the contact, newsletter, checkout and workshop forms.
+- `/login` calls `signInWithEmailAndPassword` from the Firebase Web SDK. The SDK persists the session (IndexedDB, falling back to `localStorage`), so a signed-in user stays signed in across reloads.
+- `AuthProvider` (`src/components/dashboard/AuthProvider.tsx`) subscribes to `onAuthStateChanged` and is the single source of truth for the session.
+- `DashboardShell` redirects anonymous visitors to `/login?next=…` once the SDK has resolved the session, and shows a neutral holding screen while it does.
+- There is **no email allowlist and no custom claim**. Any authenticated user of this Firebase project can open the dashboard. That is deliberate — keep the project's user list limited to studio staff, because the public web API key lets anyone *sign up* if self-service sign-up is enabled. Disable “Enable create (sign-up)” under **Authentication → Settings → User actions** or delete unexpected users.
+- Firestore rules require `request.auth != null` for all content reads and writes, so the dashboard cannot read data without a signed-in session, even if the UI is bypassed.
 
-Sign-in is **Firebase only**: there is no preview mode, shared password or local login bypass. Until the Firebase values are present, `/login` shows a setup checklist and the dashboard remains inaccessible.
+Trade-off versus the previous httpOnly cookie design: the refresh token is stored by the SDK and is readable by page JavaScript. Mitigate with a strict Content-Security-Policy, no third-party scripts on `/dashboard`, and a restricted API key.
 
 ### Firebase setup
 
 1. Create a project at <https://console.firebase.google.com>.
 2. **Authentication → Sign-in method** → enable **Email/Password**, then add the studio user under **Users**.
 3. **Project settings → General** → add a **Web app** and copy the API key and project ID.
-4. **Project settings → Service accounts** → **Generate new private key**.
+4. **Project settings → Service accounts** → **Generate new private key** (used by server rendering and the seed script).
 5. Copy the environment template and fill it in:
    ```bash
    cp .env.example .env.local
    ```
-   Set `DASHBOARD_ALLOWED_EMAILS` to the studio account email (comma-separate multiple people).
 6. Create a **Firestore** database in production mode and publish [`firestore.rules`](firestore.rules).
 7. Restart the dev server.
 8. Load the studio content into Firestore:
@@ -100,15 +109,30 @@ Sign-in is **Firebase only**: there is no preview mode, shared password or local
 
 | Variable | Where to find it | Used for |
 | --- | --- | --- |
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | Project settings → General → Web app | Browser sign-in |
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | Project settings → General → Web app | Browser sign-in and Firestore |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Same | Optional; derived from the project ID if omitted |
 | `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Same | Project identifier |
-| `FIREBASE_PROJECT_ID` | Service account JSON | Admin SDK |
+| `FIREBASE_PROJECT_ID` | Service account JSON | Admin SDK (server rendering, sitemap, seeding) |
 | `FIREBASE_CLIENT_EMAIL` | Service account JSON | Admin SDK |
 | `FIREBASE_PRIVATE_KEY` | Service account JSON | Admin SDK (`\n` newlines are normalised automatically) |
-| `DASHBOARD_ALLOWED_EMAILS` | Your choice | Comma-separated allowlist for `/dashboard`; set this in production |
 
-Never commit `.env.local` or the service-account JSON. The private key is server-only.
+Never commit `.env.local` or the service-account JSON. Only the `NEXT_PUBLIC_*` values reach the browser; the private key is server-only.
+
+### Publishing the security rules
+
+The dashboard will show *“Firestore refused the read”* until the rules are published. Either:
+
+- **Firebase console** → **Firestore Database → Rules** → paste [`firestore.rules`](firestore.rules) → **Publish**, or
+- with the Firebase CLI: `firebase deploy --only firestore:rules` (add a `firebase.json` with a `firestore.rules` entry if you use the CLI).
+
+What the rules allow:
+
+| Caller | Read | Write |
+| --- | --- | --- |
+| Anonymous visitor | nothing | create an inquiry with exactly `name, email, phone, subject, message, status: "new", notes, createdAt`; increment `events.booked` by exactly 1 up to `capacity` |
+| Signed-in user | every collection | create, update, delete everywhere |
+
+Forged inquiry status, extra fields, oversized strings, editing an event's title and setting `booked` directly are all rejected.
 
 ## Data & storage
 
@@ -118,29 +142,20 @@ Content lives **only** in **Cloud Firestore**. Collections mirror the app types:
 services   products   blogs   events   stories   inquiries
 ```
 
-Each document uses the item's `id` as its document ID. `src/lib/db.ts` is the single data layer — it reads and writes Firestore through the Firebase Admin SDK. There is no JSON database, no in-memory fallback and no browser access to Firestore.
+Each document uses the item's `id` as its document ID.
+
+- `src/lib/db.ts` — server-only, read-only access for public pages and `sitemap.xml` (Admin SDK).
+- `src/lib/firebase/browser-data.ts` — the dashboard data layer (Web SDK): list, create, update, delete, inquiry capture, atomic workshop booking and demo reset.
+- `src/lib/firebase/client.ts`, `auth.ts`, `store.ts` — lazy browser Firebase app, Auth and Firestore singletons.
 
 [`seed/firestore-seed.json`](seed/firestore-seed.json) holds the studio's starting content (the original demo catalogue, journal, workshops, stories and sample inquiries). It is used by:
 
 - `npm run seed:firestore` — initial load or full re-seed of the Firebase project.
-- **Settings → Restore demo content** (`POST /api/seed`) — protected reset to the same seed file.
+- **Settings → Restore demo content** — a signed-in reset from the browser to the same seed file (loaded on demand, so it stays out of the public bundles).
 
-Firestore rejects `undefined`, so optional fields are stripped before every write. Client access is denied in [`firestore.rules`](firestore.rules) — the site only talks to Firestore through the Admin SDK on the server.
+Firestore rejects `undefined`, so optional fields are stripped before every browser write. There is no JSON database, no in-memory fallback and no local preview data.
 
 > `npm run seed:firestore` deletes and replaces the documents in each collection. Back up live data before running it against a production project.
-
-### API
-
-| Method | Route | Access |
-| --- | --- | --- |
-| POST | `/api/inquiries` | Public — storefront forms only (status forced to `new`) |
-| GET | `/api/blogs`, `/api/products`, `/api/services`, `/api/events`, `/api/stories`, `/api/inquiries` | Signed-in dashboard |
-| POST | Same collection routes | Signed-in dashboard |
-| GET / PUT / DELETE | `/api/{resource}/{id}` | Signed-in dashboard |
-| GET | `/api/stats` | Signed-in dashboard |
-| POST | `/api/seed` | Signed-in dashboard |
-
-Image fields are sanitised server-side (`src/lib/api-helpers.ts` → `safeImage`) so a bad path falls back to studio imagery instead of breaking a page.
 
 ## Payments
 
@@ -149,46 +164,47 @@ Checkout is a **demo**: it validates the form, shows a confirmation, and records
 To take live payments:
 
 1. Add Stripe keys (e.g. `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`) to `.env.local`.
-2. Replace the `fetch("/api/inquiries", …)` call in `src/app/(site)/checkout/page.tsx` with a request to a new `/api/checkout` route that creates a Stripe Checkout Session.
+2. Replace the `createInquiry(...)` call in `src/app/(site)/checkout/page.tsx` with a Stripe Checkout Session (a route handler or a server action is the right place for the secret key).
 3. Enable Apple Pay in the Stripe Dashboard (it is a payment method on the same Checkout Session).
 
 The card fields in the current form are visual placeholders and must be replaced by Stripe Elements or Stripe Checkout before launch.
 
 ## Before launch
 
-- Confirm `.env.local` contains the production Firebase project, that `firestore.rules` is deployed, and that only studio staff exist in Firebase Authentication.
+- Publish `firestore.rules` (see above), confirm the production Firebase project is in the environment, and check the Firebase Authentication user list contains only studio staff.
+- Add **Firebase App Check** (reCAPTCHA Enterprise for the web) so the public inquiry and booking writes cannot be scripted. The rules already validate payload shape; App Check adds bot protection.
+- Restrict the web API key under **Google Cloud console → APIs & Services → Credentials** (HTTP referrers) and set up a Content-Security-Policy for `/dashboard`.
 - Update `https://shelleys.studio` in `src/app/sitemap.ts` and the metadata base in `src/app/layout.tsx` to the real domain.
 - Replace the interim Pexels stock photography in `public/images/` with real studio photography. These images are illustrative only — they are not Shelley, her studio, products or clients. See [`public/images/CREDITS.md`](public/images/CREDITS.md) for sources, licences and replacement sizes. The logo is `public/logo.jpg`.
 - Update contact details, address and opening hours in the seed data and contact page.
-- Connect the newsletter and enquiry forms to a real inbox or CRM if email notifications are required (currently they are stored in the database and shown in the dashboard).
+- Connect the newsletter and enquiry forms to a real inbox or CRM if email notifications are required (currently they are stored in Firestore and shown in the dashboard).
 
 ## Project structure
 
 ```
 src/
   app/
-    (site)/          public pages
-    login/           Firebase sign-in page + server actions
-    dashboard/       management dashboard
-    api/             JSON API routes (session-protected except inquiry POST)
+    (site)/          public pages (server-rendered)
+    login/           Firebase Web SDK sign-in
+    dashboard/       management dashboard (client data, server metadata)
+    sitemap.ts       server-rendered sitemap (Admin SDK)
   components/
     site/            public UI (cards, grids, forms, carousel…)
-    dashboard/       dashboard tables, sidebar, inquiry manager
+    dashboard/       dashboard shell, tables, sidebar, inquiry manager
     cart/            cart context + drawer
   lib/
-    auth/            Firebase config, session cookies, route guards
-    firebase/        lazy Firebase Admin app/auth/Firestore
-    db.ts            Firestore data layer (read/write, seed reset)
-    api-helpers.ts   shared CRUD handlers + auth checks
+    auth/config.ts   environment readers (server + public config)
+    firebase/        admin.ts (server), client.ts/auth.ts/store.ts (browser),
+                     browser-data.ts (dashboard CRUD and public writes)
+    db.ts            server-only read layer for public pages and sitemap
     resource-config.ts  field definitions for each dashboard resource
     types.ts         domain types
     utils.ts         formatting, slugify, safeImage
-  proxy.ts           dashboard redirect for anonymous requests
 public/images/       interim stock photography (see CREDITS.md)
 scripts/
   seed-firestore.mjs loads seed/firestore-seed.json into Cloud Firestore
 seed/
   firestore-seed.json starting content for the studio
-firestore.rules      deny direct client access; Admin SDK only
+firestore.rules      security rules for direct browser access
 .env.example         Firebase environment template
 ```

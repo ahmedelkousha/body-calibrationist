@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import type { Event } from "@/lib/types";
 import { formatDate, formatPrice, safeImage } from "@/lib/utils";
+import { createEventBooking } from "@/lib/firebase/data";
 
 type Props = { events: Event[] };
 
@@ -29,10 +30,8 @@ export default function EventsList({ events }: Props) {
     if (!selected) return;
     setStatus("sending");
     try {
-      const response = await fetch("/api/inquiries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      await createEventBooking(
+        {
           name: form.name,
           email: form.email,
           phone: form.phone,
@@ -40,12 +39,10 @@ export default function EventsList({ events }: Props) {
           message:
             form.message ||
             `Please reserve a place at ${selected.title} on ${formatDate(selected.date)} (${selected.time}).`,
-          status: "new",
           notes: `Booking request · ${selected.title}`,
-          eventId: selected.id,
-        }),
-      });
-      if (!response.ok) throw new Error("failed");
+        },
+        selected.id,
+      );
 
       setItems((current) =>
         current.map((event) =>

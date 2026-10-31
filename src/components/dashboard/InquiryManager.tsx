@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Inquiry, InquiryStatus } from "@/lib/types";
 import { cn, formatRelative, initials } from "@/lib/utils";
+import { deleteResource, listResource, updateResource } from "@/lib/firebase/data";
 import { StatusBadge } from "./ui";
 
 const tabs: { key: InquiryStatus | "all"; label: string }[] = [
@@ -14,28 +14,52 @@ const tabs: { key: InquiryStatus | "all"; label: string }[] = [
   { key: "archived", label: "Archived" },
 ];
 
-export default function InquiryManager({ initialInquiries }: { initialInquiries: Inquiry[] }) {
-  const router = useRouter();
-  const [items, setItems] = useState(initialInquiries);
+export default function InquiryManager() {
+  const [items, setItems] = useState<Inquiry[] | null>(null);
+  const [loadError, setLoadError] = useState("");
   const [tab, setTab] = useState<InquiryStatus | "all">("all");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(initialInquiries[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [toast, setToast] = useState("");
 
+  useEffect(() => {
+    let cancelled = false;
+
+    listResource("inquiries")
+      .then((rows) => {
+        if (cancelled) return;
+        setItems(rows);
+        setSelectedId(rows[0]?.id ?? null);
+        setNotes(rows[0]?.notes ?? "");
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setItems([]);
+        setLoadError(
+          "Could not load inquiries. Check that you are signed in and that firestore.rules is deployed.",
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const counts = useMemo(() => {
+    const list = items ?? [];
     return {
-      all: items.length,
-      new: items.filter((item) => item.status === "new").length,
-      read: items.filter((item) => item.status === "read").length,
-      replied: items.filter((item) => item.status === "replied").length,
-      archived: items.filter((item) => item.status === "archived").length,
+      all: list.length,
+      new: list.filter((item) => item.status === "new").length,
+      read: list.filter((item) => item.status === "read").length,
+      replied: list.filter((item) => item.status === "replied").length,
+      archived: list.filter((item) => item.status === "archived").length,
     };
   }, [items]);
 
   const filtered = useMemo(() => {
-    let list = items;
+    let list: Inquiry[] = items ?? [];
     if (tab !== "all") list = list.filter((item) => item.status === tab);
     if (query.trim()) {
       const q = query.toLowerCase();
@@ -50,7 +74,7 @@ export default function InquiryManager({ initialInquiries }: { initialInquiries:
     return list;
   }, [items, tab, query]);
 
-  const selected = items.find((item) => item.id === selectedId) ?? null;
+  const selected = (items ?? []).find((item) => item.id === selectedId) ?? null;
 
   function select(inquiry: Inquiry) {
     setSelectedId(inquiry.id);
@@ -58,18 +82,16 @@ export default function InquiryManager({ initialInquiries }: { initialInquiries:
   }
 
   async function updateStatus(inquiry: Inquiry, status: InquiryStatus) {
-    setItems((current) => current.map((item) => (item.id === inquiry.id ? { ...item, status } : item)));
     try {
-      await fetch(`/api/inquiries/${inquiry.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      router.refresh();
+      await updateResource("inquiries", inquiry.id, { status });
+      setItems((current) =>
+        (current ?? []).map((item) => (item.id === inquiry.id ? { ...item, status } : item)),
+      );
       setToast(`Marked as ${status}`);
-      window.setTimeout(() => setToast(""), 2400);
     } catch {
       setToast("Could not update");
+    } finally {
+      window.setTimeout(() => setToast(""), 2400);
     }
   }
 
@@ -77,32 +99,52 @@ export default function InquiryManager({ initialInquiries }: { initialInquiries:
     if (!selected) return;
     setSavingNotes(true);
     try {
-      await fetch(`/api/inquiries/${selected.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notes }),
-      });
-      setItems((current) => current.map((item) => (item.id === selected.id ? { ...item, notes } : item)));
+      await updateResource("inquiries", selected.id, { notes });
+      setItems((current) =>
+        (current ?? []).map((item) => (item.id === selected.id ? { ...item, notes } : item)),
+      );
       setToast("Notes saved");
-      window.setTimeout(() => setToast(""), 2400);
-      router.refresh();
     } catch {
       setToast("Could not save notes");
     } finally {
       setSavingNotes(false);
+      window.setTimeout(() => setToast(""), 2400);
     }
   }
 
   async function remove(inquiry: Inquiry) {
     if (!window.confirm(`Delete the message from ${inquiry.name}? This cannot be undone.`)) return;
-    await fetch(`/api/inquiries/${inquiry.id}`, { method: "DELETE" });
-    setItems((current) => current.filter((item) => item.id !== inquiry.id));
-    if (selectedId === inquiry.id) setSelectedId(null);
-    router.refresh();
+    try {
+      await deleteResource("inquiries", inquiry.id);
+      setItems((current) => (current ?? []).filter((item) => item.id !== inquiry.id));
+      if (selectedId === inquiry.id) setSelectedId(null);
+      setToast("Message deleted");
+      window.setTimeout(() => setToast(""), 2400);
+    } catch {
+      setToast("Could not delete this message");
+      window.setTimeout(() => setToast(""), 2400);
+    }
+  }
+
+  if (items === null) {
+    return (
+      <div className="mt-8 rounded-2xl border border-sand/60 bg-white/70 px-6 py-16 text-center">
+        <p className="font-display text-xl text-ink">Loading messages…</p>
+        <p className="mt-1 text-sm text-ink-soft">Reading inquiries from Cloud Firestore.</p>
+      </div>
+    );
   }
 
   return (
     <div>
+      {loadError && (
+        <p
+          role="alert"
+          className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800"
+        >
+          {loadError}
+        </p>
+      )}
       <div className="mt-8 flex flex-col gap-3 rounded-2xl border border-sand/60 bg-white/60 p-3 lg:flex-row lg:items-center">
         <div className="flex flex-wrap gap-1">
           {tabs.map((item) => (

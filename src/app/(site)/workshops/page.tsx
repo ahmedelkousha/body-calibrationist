@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { readDb } from "@/lib/db";
+import { readContent } from "@/lib/firebase/data";
 import EventsList from "@/components/site/EventsList";
 import Reveal from "@/components/site/Reveal";
 
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkshopsPage() {
-  const db = await readDb();
+  const db = await readContent();
   const events = db.events
     .filter((event) => event.status !== "past")
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());

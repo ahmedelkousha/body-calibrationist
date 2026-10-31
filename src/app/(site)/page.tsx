@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { readDb } from "@/lib/db";
+import { readContent } from "@/lib/firebase/data";
 import { formatDate, formatPrice } from "@/lib/utils";
 import Reveal from "@/components/site/Reveal";
 import SectionHeading from "@/components/site/SectionHeading";
@@ -22,7 +22,7 @@ const values = [
 ];
 
 export default async function HomePage() {
-  const db = await readDb();
+  const db = await readContent();
   const services = db.services.filter((service) => service.featured).slice(0, 3);
   const products = db.products
     .filter((product) => product.status === "active" && product.featured)

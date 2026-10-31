@@ -2,10 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ResourceConfig, FieldConfig } from "@/lib/resource-config";
 import { cn, formatDateShort, formatPrice, safeImage } from "@/lib/utils";
+import {
+  createResource,
+  deleteResource,
+  listResource,
+  updateResource,
+} from "@/lib/firebase/data";
 import { StatusBadge } from "./ui";
 
 type Item = Record<string, unknown> & { id: string; slug: string; createdAt?: string };
@@ -17,15 +22,9 @@ function formatMeta(value: unknown, format?: string): string {
   return String(value);
 }
 
-export default function ResourceManager({
-  config,
-  initialItems,
-}: {
-  config: ResourceConfig;
-  initialItems: Item[];
-}) {
-  const router = useRouter();
-  const [items, setItems] = useState<Item[]>(initialItems);
+export default function ResourceManager({ config }: { config: ResourceConfig }) {
+  const [items, setItems] = useState<Item[] | null>(null);
+  const [loadError, setLoadError] = useState("");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [editing, setEditing] = useState<Item | "new" | null>(null);
@@ -35,8 +34,29 @@ export default function ResourceManager({
   const [deleting, setDeleting] = useState<Item | null>(null);
   const [toast, setToast] = useState("");
 
+  useEffect(() => {
+    let cancelled = false;
+
+    listResource(config.key)
+      .then((rows) => {
+        if (!cancelled) setItems(rows as unknown as Item[]);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setItems([]);
+          setLoadError(
+            "Could not load this collection from Firestore. Check that you are signed in and that firestore.rules is deployed.",
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [config.key]);
+
   const filtered = useMemo(() => {
-    let list = items;
+    let list: Item[] = items ?? [];
     if (query.trim()) {
       const q = query.toLowerCase();
       list = list.filter((item) =>
@@ -96,24 +116,19 @@ export default function ResourceManager({
 
     try {
       const isNew = editing === "new";
-      const url = isNew ? `/api/${config.key}` : `/api/${config.key}/${(editing as Item).id}`;
-      const response = await fetch(url, {
-        method: isNew ? "POST" : "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error("Request failed");
-      const saved = (await response.json()) as Item;
+      const saved = (isNew
+        ? await createResource(config.key, config.prefix, payload)
+        : await updateResource(config.key, (editing as Item).id, payload)) as unknown as Item;
 
-      setItems((current) =>
-        isNew ? [saved, ...current] : current.map((item) => (item.id === saved.id ? saved : item)),
-      );
+      setItems((current) => {
+        const list = current ?? [];
+        return isNew ? [saved, ...list] : list.map((item) => (item.id === saved.id ? { ...item, ...saved } : item));
+      });
       setEditing(null);
       setToast(isNew ? `${config.singular} created` : `${config.singular} updated`);
       window.setTimeout(() => setToast(""), 3000);
-      router.refresh();
     } catch {
-      setError("Could not save. Please check the fields and try again.");
+      setError("Could not save. Please check the fields, your sign-in and firestore.rules.");
     } finally {
       setSaving(false);
     }
@@ -123,15 +138,13 @@ export default function ResourceManager({
     if (!deleting) return;
     setSaving(true);
     try {
-      const response = await fetch(`/api/${config.key}/${deleting.id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("failed");
-      setItems((current) => current.filter((item) => item.id !== deleting.id));
+      await deleteResource(config.key, deleting.id);
+      setItems((current) => (current ?? []).filter((item) => item.id !== deleting.id));
       setDeleting(null);
       setToast(`${config.singular} deleted`);
       window.setTimeout(() => setToast(""), 3000);
-      router.refresh();
     } catch {
-      setError("Could not delete this item.");
+      setError("Could not delete this item. Check that you are signed in and that firestore.rules is deployed.");
     } finally {
       setSaving(false);
     }
@@ -174,6 +187,15 @@ export default function ResourceManager({
         </button>
       </div>
 
+      {loadError && (
+        <p
+          role="alert"
+          className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800"
+        >
+          {loadError}
+        </p>
+      )}
+
       {/* Table */}
       <div className="mt-4 overflow-hidden rounded-2xl border border-sand/60 bg-white/70">
         <div className="hidden grid-cols-12 gap-4 border-b border-sand/60 px-5 py-3 text-[10px] uppercase tracking-[0.16em] text-ink-soft md:grid">
@@ -187,7 +209,12 @@ export default function ResourceManager({
           <span className="col-span-2 text-right">Actions</span>
         </div>
 
-        {filtered.length === 0 ? (
+        {items === null ? (
+          <div className="px-6 py-16 text-center">
+            <p className="font-display text-xl text-ink">Loading {config.plural.toLowerCase()}…</p>
+            <p className="mt-1 text-sm text-ink-soft">Reading the collection from Cloud Firestore.</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="px-6 py-14 text-center">
             <p className="font-display text-xl text-ink">Nothing here yet</p>
             <p className="mt-1 text-sm text-ink-soft">
@@ -277,7 +304,7 @@ export default function ResourceManager({
         )}
       </div>
       <p className="mt-3 text-[11px] text-ink-soft">
-        Showing {filtered.length} of {items.length} {config.plural.toLowerCase()}
+        Showing {filtered.length} of {(items ?? []).length} {config.plural.toLowerCase()}
       </p>
 
       {toast && (

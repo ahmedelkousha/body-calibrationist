@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatPrice, safeImage } from "@/lib/utils";
+import { createInquiry } from "@/lib/firebase/data";
 
 const inputClass =
   "w-full rounded-xl border border-sand bg-white/70 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink-soft/60 focus:border-teal focus:bg-white";
@@ -38,20 +39,14 @@ export default function CheckoutPage() {
       const summary = lines
         .map((line) => `${line.quantity} × ${line.name} (${formatPrice(line.price)})`)
         .join(", ");
-      const response = await fetch("/api/inquiries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          subject: `Store order ${reference}`,
-          message: `Order ${reference}\n\n${summary}\n\nTotal: ${formatPrice(total)}\nShip to: ${form.address}, ${form.city} ${form.postcode}\nPayment: ${form.method === "apple" ? "Apple Pay (demo)" : "Card (demo)"}`,
-          status: "new",
-          notes: `Store order · ${count} item(s) · ${formatPrice(total)}`,
-        }),
+      await createInquiry({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        subject: `Store order ${reference}`,
+        message: `Order ${reference}\n\n${summary}\n\nTotal: ${formatPrice(total)}\nShip to: ${form.address}, ${form.city} ${form.postcode}\nPayment: ${form.method === "apple" ? "Apple Pay (demo)" : "Card (demo)"}`,
+        notes: `Store order · ${count} item(s) · ${formatPrice(total)}`,
       });
-      if (!response.ok) throw new Error("failed");
       setOrderRef(reference);
       setStatus("done");
       clear();

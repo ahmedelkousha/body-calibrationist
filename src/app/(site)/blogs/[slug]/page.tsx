@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBySlug, readDb } from "@/lib/db";
+import { getBySlug, readCollection } from "@/lib/firebase/data";
 import { formatDate, safeImage } from "@/lib/utils";
-import Markdown from "@/lib/markdown";
+import Markdown from "@/components/site/Markdown";
 import BlogCard from "@/components/site/BlogCard";
 
 export const dynamic = "force-dynamic";
@@ -33,8 +33,8 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await getBySlug("blogs", slug);
   if (!post || post.status !== "published") notFound();
 
-  const db = await readDb();
-  const more = db.blogs
+  const blogs = await readCollection("blogs");
+  const more = blogs
     .filter((item) => item.id !== post.id && item.status === "published")
     .slice(0, 3);
 
@@ -44,7 +44,7 @@ export default async function BlogPostPage({ params }: Props) {
         <nav className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-ink-soft">
           <Link href="/" className="hover:text-ink">Home</Link>
           <span>/</span>
-          <Link href="/blog" className="hover:text-ink">Journal</Link>
+          <Link href="/blogs" className="hover:text-ink">Journal</Link>
           <span>/</span>
           <span className="truncate text-ink">{post.category}</span>
         </nav>
@@ -110,7 +110,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
             <div className="flex items-end justify-between gap-4">
               <h2 className="font-display text-3xl text-ink">Keep reading</h2>
-              <Link href="/blog" className="text-[11px] uppercase tracking-[0.16em] text-teal">
+              <Link href="/blogs" className="text-[11px] uppercase tracking-[0.16em] text-teal">
                 All articles →
               </Link>
             </div>

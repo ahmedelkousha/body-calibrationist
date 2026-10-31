@@ -7,7 +7,7 @@ export default function BlogCard({ post, compact = false }: { post: BlogPost; co
   return (
     <article className="group flex flex-col">
       <Link
-        href={`/blog/${post.slug}`}
+        href={`/blogs/${post.slug}`}
         className="relative block overflow-hidden rounded-[1.75rem] bg-cream-deep"
         style={{ aspectRatio: compact ? "16 / 10" : "4 / 3" }}
       >
@@ -29,7 +29,7 @@ export default function BlogCard({ post, compact = false }: { post: BlogPost; co
           <span>{post.readMinutes} min read</span>
         </div>
         <h3 className={compact ? "mt-2 font-display text-xl leading-snug text-ink" : "mt-2 font-display text-2xl leading-snug text-ink"}>
-          <Link href={`/blog/${post.slug}`} className="transition hover:text-teal">
+          <Link href={`/blogs/${post.slug}`} className="transition hover:text-teal">
             {post.title}
           </Link>
         </h3>

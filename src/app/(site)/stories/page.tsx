@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { readDb } from "@/lib/db";
+import { readContent } from "@/lib/firebase/data";
 import Reveal from "@/components/site/Reveal";
 import StarRating from "@/components/site/StarRating";
 import { safeImage } from "@/lib/utils";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function StoriesPage() {
-  const db = await readDb();
+  const db = await readContent();
   const stories = db.stories;
 
   return (

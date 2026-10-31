@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { readDb } from "@/lib/db";
+import { readContent } from "@/lib/firebase/data";
 import { formatDate, safeImage } from "@/lib/utils";
 import BlogExplorer from "@/components/site/BlogExplorer";
 import Reveal from "@/components/site/Reveal";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
-  const db = await readDb();
+  const db = await readContent();
   const published = db.blogs
     .filter((post) => post.status === "published")
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
@@ -45,7 +45,7 @@ export default async function BlogPage() {
         <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
           <Reveal>
             <Link
-              href={`/blog/${lead.slug}`}
+              href={`/blogs/${lead.slug}`}
               className="group grid overflow-hidden rounded-[2.5rem] border border-sand/60 bg-white/50 lg:grid-cols-2"
             >
               <div className="relative aspect-[16/10] overflow-hidden lg:aspect-auto lg:min-h-[420px]">

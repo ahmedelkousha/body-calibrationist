@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBySlug, readDb } from "@/lib/db";
+import { getBySlug, readCollection } from "@/lib/firebase/data";
 import { formatPrice, safeImage } from "@/lib/utils";
 import AddToCartButton from "@/components/site/AddToCartButton";
 import ProductCard from "@/components/site/ProductCard";
-import Markdown from "@/lib/markdown";
+import Markdown from "@/components/site/Markdown";
 import StarRating from "@/components/site/StarRating";
 
 export const dynamic = "force-dynamic";
@@ -29,8 +29,8 @@ export default async function ProductPage({ params }: Props) {
   const product = await getBySlug("products", slug);
   if (!product || product.status !== "active") notFound();
 
-  const db = await readDb();
-  const related = db.products
+  const products = await readCollection("products");
+  const related = products
     .filter((item) => item.id !== product.id && item.status === "active")
     .slice(0, 3);
 

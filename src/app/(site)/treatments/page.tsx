@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { readDb } from "@/lib/db";
+import { readContent } from "@/lib/firebase/data";
 import ServiceCard from "@/components/site/ServiceCard";
 import Reveal from "@/components/site/Reveal";
 import SectionHeading from "@/components/site/SectionHeading";
@@ -32,7 +32,7 @@ const steps = [
 ];
 
 export default async function TreatmentsPage() {
-  const db = await readDb();
+  const db = await readContent();
   const services = db.services;
 
   return (
