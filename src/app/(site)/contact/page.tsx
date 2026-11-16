@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ContactForm from "@/components/site/ContactForm";
 import Reveal from "@/components/site/Reveal";
+import { ArrowRightIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Reach Us",
@@ -106,8 +107,12 @@ export default function ContactPage() {
               </div>
               <div className="flex items-center justify-between gap-4 px-5 py-4">
                 <p className="text-xs text-ink-soft">Free 2-hour parking after 5pm · 2 min from the beach</p>
-                <Link href="/workshops" className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-teal">
-                  Visit us →
+                <Link
+                  href="/workshops"
+                  className="group/link inline-flex shrink-0 items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-teal hover:text-ink"
+                >
+                  <span>Visit us</span>
+                  <ArrowRightIcon className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
                 </Link>
               </div>
             </div>

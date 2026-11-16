@@ -6,6 +6,7 @@ import { getBySlug, readCollection } from "@/lib/firebase/data";
 import { formatPrice, safeImage } from "@/lib/utils";
 import Markdown from "@/components/site/Markdown";
 import ServiceCard from "@/components/site/ServiceCard";
+import { ArrowRightIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -87,20 +88,20 @@ export default async function ServicePage({ params }: Props) {
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/contact"
+              href={`/checkout/service/${service.slug}`}
               className="rounded-full bg-teal px-8 py-3.5 text-center text-[11px] uppercase tracking-[0.18em] text-cream transition hover:bg-ink"
             >
-              Enquire about this treatment
+              Reserve &amp; pay
             </Link>
             <Link
-              href="/workshops"
+              href="/contact"
               className="rounded-full border border-sand px-8 py-3.5 text-center text-[11px] uppercase tracking-[0.18em] text-ink transition hover:border-teal hover:text-teal"
             >
-              See workshops
+              Enquire first
             </Link>
           </div>
           <p className="mt-4 text-[11px] text-ink-soft">
-            Payment by card or Apple Pay at the studio, or in advance when we confirm your time.
+            Secure card payment through Stripe. We&apos;ll confirm your appointment time by email.
           </p>
         </div>
       </section>
@@ -122,8 +123,12 @@ export default async function ServicePage({ params }: Props) {
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20">
         <div className="flex items-end justify-between gap-4">
           <h2 className="font-display text-3xl text-ink sm:text-4xl">You may also like</h2>
-          <Link href="/treatments" className="text-[11px] uppercase tracking-[0.16em] text-teal">
-            All treatments →
+          <Link
+            href="/treatments"
+            className="group/link inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-teal hover:text-ink"
+          >
+            <span>All treatments</span>
+            <ArrowRightIcon className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
           </Link>
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-3">

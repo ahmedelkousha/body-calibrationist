@@ -6,6 +6,7 @@ import { getBySlug, readCollection } from "@/lib/firebase/data";
 import { formatDate, safeImage } from "@/lib/utils";
 import Markdown from "@/components/site/Markdown";
 import BlogCard from "@/components/site/BlogCard";
+import { ArrowRightIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -110,8 +111,12 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
             <div className="flex items-end justify-between gap-4">
               <h2 className="font-display text-3xl text-ink">Keep reading</h2>
-              <Link href="/blogs" className="text-[11px] uppercase tracking-[0.16em] text-teal">
-                All articles →
+              <Link
+                href="/blogs"
+                className="group/link inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-teal hover:text-ink"
+              >
+                <span>All articles</span>
+                <ArrowRightIcon className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
               </Link>
             </div>
             <div className="mt-8 grid gap-10 md:grid-cols-3">

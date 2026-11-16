@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeftIcon } from "@/components/icons";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import LoginForm from "./LoginForm";
 
@@ -138,8 +139,12 @@ export default async function LoginPage({
           )}
 
           <div className="mt-10 flex items-center justify-between border-t border-sand/70 pt-5">
-            <Link href="/" className="text-[10px] uppercase tracking-[0.16em] text-ink-soft transition hover:text-teal">
-              ← Back to website
+            <Link
+              href="/"
+              className="group/link inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-ink-soft transition hover:text-teal"
+            >
+              <ArrowLeftIcon className="h-3 w-3 transition-transform group-hover/link:-translate-x-0.5" />
+              <span>Back to website</span>
             </Link>
             <span className="text-[10px] uppercase tracking-[0.16em] text-ink-soft/60">
               {clientConfig ? "Firebase Web SDK" : "Firebase not configured"}

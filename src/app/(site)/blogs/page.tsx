@@ -5,6 +5,7 @@ import { readContent } from "@/lib/firebase/data";
 import { formatDate, safeImage } from "@/lib/utils";
 import BlogExplorer from "@/components/site/BlogExplorer";
 import Reveal from "@/components/site/Reveal";
+import { ArrowRightIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -73,7 +74,7 @@ export default async function BlogPage() {
                 </div>
                 <span className="mt-7 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-teal">
                   Read the article
-                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                  <ArrowRightIcon className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                 </span>
               </div>
             </Link>

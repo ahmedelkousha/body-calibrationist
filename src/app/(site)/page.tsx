@@ -9,6 +9,7 @@ import ProductCard from "@/components/site/ProductCard";
 import BlogCard from "@/components/site/BlogCard";
 import StoryCarousel from "@/components/site/StoryCarousel";
 import StarRating from "@/components/site/StarRating";
+import { ArrowRightIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -69,7 +70,7 @@ export default async function HomePage() {
                 className="group inline-flex items-center justify-center gap-2 rounded-full bg-teal px-8 py-3.5 text-[11px] uppercase tracking-[0.2em] text-cream transition hover:bg-ink"
               >
                 Explore treatments
-                <span className="transition-transform group-hover:translate-x-1">→</span>
+                <ArrowRightIcon className="h-3 w-3 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/store"
@@ -125,9 +126,10 @@ export default async function HomePage() {
               </p>
               <Link
                 href="/workshops"
-                className="mt-3 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.18em] text-teal"
+                className="group/link mt-3 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-teal"
               >
-                Reserve a place →
+                <span>Reserve a place</span>
+                <ArrowRightIcon className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
               </Link>
             </div>
             <div className="absolute -right-2 top-8 hidden rounded-full border border-gold/40 bg-cream/80 px-4 py-2 text-[9px] uppercase tracking-[0.2em] text-ink backdrop-blur sm:block">

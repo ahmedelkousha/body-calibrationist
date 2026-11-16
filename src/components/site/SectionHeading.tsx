@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { ArrowRightIcon } from "@/components/icons";
 
 export default function SectionHeading({
   eyebrow,
@@ -40,7 +41,7 @@ export default function SectionHeading({
           className="group inline-flex shrink-0 items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-ink transition hover:text-teal"
         >
           {action.label}
-          <span className="transition-transform group-hover:translate-x-1">→</span>
+          <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
         </Link>
       )}
     </div>

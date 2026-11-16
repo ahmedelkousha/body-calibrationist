@@ -1,12 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRightIcon } from "@/components/icons";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Settings | Dashboard" };
 
 export default function SettingsPage() {
-  const firestoreConnected = isFirebaseConfigured !== null;
-  const authConnected = firestoreConnected && isFirebaseConfigured;
+  const firestoreConnected = isFirebaseConfigured;
+  const authConnected = firestoreConnected;
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  const stripeConnected = Boolean(stripeKey);
+  const stripeMode = stripeKey?.startsWith("sk_live_") ? "Live mode" : "Test mode";
 
   const integrations = [
     {
@@ -20,14 +26,15 @@ export default function SettingsPage() {
       name: "Firestore database",
       status: firestoreConnected ? "Connected" : "Not configured",
       description: firestoreConnected
-        ? "The dashboard reads and writes Cloud Firestore directly from the browser through the Firebase Web SDK. Public pages are still rendered on the server (Admin SDK) so the site keeps its SEO and first paint. firestore.rules allows signed-in studio users to manage content and anonymous visitors to create an inquiry only."
-        : "Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY, then run npm run seed:firestore to load seed/firestore-seed.json. There is no local database fallback.",
+        ? "The dashboard reads and writes Cloud Firestore directly from the browser through the Firebase Web SDK. Public pages are rendered on the server with the same SDK, so the site keeps its SEO and first paint. Your Firestore security rules allow signed-in studio users to manage content and anonymous visitors to read content and create an inquiry."
+        : "Add NEXT_PUBLIC_FIREBASE_API_KEY and NEXT_PUBLIC_FIREBASE_PROJECT_ID to .env.local, then run npm run seed:firestore to load seed/firestore-seed.json. There is no local database fallback.",
     },
     {
       name: "Stripe payments",
-      status: "Demo mode",
-      description:
-        "The checkout flow is built and logs orders as inquiries. Connect a verified Stripe account and swap the placeholder form for Stripe Elements or a Checkout session.",
+      status: stripeConnected ? stripeMode : "Not configured",
+      description: stripeConnected
+        ? "Product checkouts and treatment bookings create a Stripe Checkout Session on the Next.js server. Paid orders appear under Dashboard → Orders, where full or partial refunds can be issued to the original card. Orders and refunds live in Stripe, not Firestore."
+        : "Add STRIPE_SECRET_KEY to .env.local and restart the server. Until then the checkout buttons explain that online payment is unavailable and invite clients to contact the studio.",
     },
     {
       name: "Apple Pay",
@@ -85,9 +92,10 @@ export default function SettingsPage() {
           </dl>
           <Link
             href="/contact"
-            className="mt-5 inline-flex text-[10px] uppercase tracking-[0.16em] text-teal hover:text-ink"
+            className="group/link mt-5 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-teal hover:text-ink"
           >
-            View contact page →
+            <span>View contact page</span>
+            <ArrowRightIcon className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
           </Link>
         </section>
 

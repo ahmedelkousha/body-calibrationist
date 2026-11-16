@@ -4,6 +4,7 @@ import { readContent } from "@/lib/firebase/data";
 import ServiceCard from "@/components/site/ServiceCard";
 import Reveal from "@/components/site/Reveal";
 import SectionHeading from "@/components/site/SectionHeading";
+import { PlusIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,7 @@ export default async function TreatmentsPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20">
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           {services.map((service, index) => (
             <Reveal key={service.id} delay={index * 80}>
               <ServiceCard service={service} />
@@ -111,7 +112,7 @@ export default async function TreatmentsPage() {
               <details key={item.q} className="group py-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left font-display text-xl text-ink marker:hidden">
                   {item.q}
-                  <span className="text-gold transition group-open:rotate-45">+</span>
+                  <PlusIcon className="h-3 w-3 shrink-0 text-gold transition-transform duration-200 group-open:rotate-45" />
                 </summary>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">{item.a}</p>
               </details>

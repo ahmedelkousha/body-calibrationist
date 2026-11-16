@@ -5,8 +5,9 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Database } from "@/lib/types";
 import { readAllContent } from "@/lib/firebase/data";
-import { formatDateShort, formatPrice, formatRelative, initials, safeImage } from "@/lib/utils";
+import { cn, formatDateShort, formatPrice, formatRelative, initials, safeImage } from "@/lib/utils";
 import { StatCard, StatusBadge } from "./ui";
+import { ArrowRightIcon, RefreshIcon } from "@/components/icons";
 
 function buildWeeklySeries(inquiries: { createdAt: string }[]) {
   const now = Date.now();
@@ -27,6 +28,23 @@ function buildWeeklySeries(inquiries: { createdAt: string }[]) {
 export default function DashboardOverview() {
   const [data, setData] = useState<Database | null>(null);
   const [error, setError] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  async function handleRefresh() {
+    setIsRefreshing(true);
+    try {
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 600));
+      const [database] = await Promise.all([readAllContent(), minDelay]);
+      setData(database);
+      setError("");
+    } catch {
+      setError(
+        "Could not load the studio data. Check that you are signed in and that firestore.rules is deployed.",
+      );
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +71,15 @@ export default function DashboardOverview() {
       <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-10 text-center">
         <p className="font-display text-2xl text-ink">The dashboard is signed in, but Firestore refused the read.</p>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-soft">{error}</p>
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="mt-5 inline-flex items-center gap-2 rounded-full bg-teal px-5 py-2.5 text-[11px] uppercase tracking-[0.14em] text-cream hover:bg-ink disabled:opacity-60"
+        >
+          <RefreshIcon className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
+          <span>{isRefreshing ? "Refreshing…" : "Try again"}</span>
+        </button>
       </div>
     );
   }
@@ -95,7 +122,18 @@ export default function DashboardOverview() {
               : "Everything is answered. The studio is quiet today."}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            title="Refresh overview"
+            aria-label="Refresh overview"
+            className="inline-flex items-center gap-2 rounded-full border border-sand bg-white/60 px-4 py-2.5 text-[11px] uppercase tracking-[0.14em] text-ink-soft transition hover:border-teal hover:text-teal disabled:opacity-60"
+          >
+            <RefreshIcon className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin text-teal")} />
+            <span>{isRefreshing ? "Refreshing…" : "Refresh"}</span>
+          </button>
           <Link
             href="/dashboard/blogs"
             className="rounded-full border border-sand bg-white/60 px-4 py-2.5 text-[11px] uppercase tracking-[0.14em] text-ink transition hover:border-teal hover:text-teal"
@@ -243,8 +281,12 @@ export default function DashboardOverview() {
         <section className="overflow-hidden rounded-2xl border border-sand/60 bg-white/70 lg:col-span-7">
           <div className="flex items-center justify-between border-b border-sand/60 px-5 py-4">
             <h2 className="font-display text-xl text-ink">Latest messages</h2>
-            <Link href="/dashboard/inquiries" className="text-[10px] uppercase tracking-[0.14em] text-teal">
-              View all →
+            <Link
+              href="/dashboard/inquiries"
+              className="group/link inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-teal hover:text-ink"
+            >
+              <span>View all</span>
+              <ArrowRightIcon className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
             </Link>
           </div>
           <ul className="divide-y divide-sand/50">
@@ -277,8 +319,12 @@ export default function DashboardOverview() {
         <section className="overflow-hidden rounded-2xl border border-sand/60 bg-white/70 lg:col-span-5">
           <div className="flex items-center justify-between border-b border-sand/60 px-5 py-4">
             <h2 className="font-display text-xl text-ink">The journal</h2>
-            <Link href="/dashboard/blogs" className="text-[10px] uppercase tracking-[0.14em] text-teal">
-              Manage →
+            <Link
+              href="/dashboard/blogs"
+              className="group/link inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-teal hover:text-ink"
+            >
+              <span>Manage</span>
+              <ArrowRightIcon className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
             </Link>
           </div>
           <ul className="divide-y divide-sand/50">

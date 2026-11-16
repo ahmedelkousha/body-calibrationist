@@ -12,6 +12,7 @@ import {
   updateResource,
 } from "@/lib/firebase/data";
 import { StatusBadge } from "./ui";
+import { PlusIcon, RefreshIcon } from "@/components/icons";
 
 type Item = Record<string, unknown> & { id: string; slug: string; createdAt?: string };
 
@@ -30,9 +31,28 @@ export default function ResourceManager({ config }: { config: ResourceConfig }) 
   const [editing, setEditing] = useState<Item | "new" | null>(null);
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState<Item | null>(null);
   const [toast, setToast] = useState("");
+
+  async function refreshData() {
+    setIsRefreshing(true);
+    try {
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 600));
+      const [rows] = await Promise.all([listResource(config.key), minDelay]);
+      setItems(rows as unknown as Item[]);
+      setLoadError("");
+      setToast(`${config.plural} refreshed`);
+      window.setTimeout(() => setToast(""), 2400);
+    } catch {
+      setLoadError(
+        "Could not load this collection from Firestore. Check that you are signed in and that firestore.rules is deployed.",
+      );
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -180,20 +200,41 @@ export default function ResourceManager({ config }: { config: ResourceConfig }) 
           </select>
         )}
         <button
-          onClick={openNew}
-          className="rounded-xl bg-teal px-4 py-2.5 text-[11px] uppercase tracking-[0.14em] text-cream transition hover:bg-ink"
+          type="button"
+          onClick={refreshData}
+          disabled={isRefreshing}
+          title={`Refresh ${config.plural.toLowerCase()}`}
+          aria-label={`Refresh ${config.plural.toLowerCase()}`}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-sand/70 bg-white/70 px-3.5 py-2.5 text-[11px] uppercase tracking-[0.14em] text-ink-soft transition hover:border-teal hover:text-teal disabled:opacity-60"
         >
-          + New {config.singular}
+          <RefreshIcon className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin text-teal")} />
+          <span className="hidden sm:inline">{isRefreshing ? "Refreshing…" : "Refresh"}</span>
+        </button>
+        <button
+          onClick={openNew}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-teal px-4 py-2.5 text-[11px] uppercase tracking-[0.14em] text-cream transition hover:bg-ink"
+        >
+          <PlusIcon className="h-3 w-3" />
+          <span>New {config.singular}</span>
         </button>
       </div>
 
       {loadError && (
-        <p
+        <div
           role="alert"
-          className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800"
+          className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800"
         >
-          {loadError}
-        </p>
+          <p>{loadError}</p>
+          <button
+            type="button"
+            onClick={refreshData}
+            disabled={isRefreshing}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100/70 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-amber-900 transition hover:bg-amber-100 disabled:opacity-60"
+          >
+            <RefreshIcon className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+            <span>Try again</span>
+          </button>
+        </div>
       )}
 
       {/* Table */}
@@ -222,8 +263,12 @@ export default function ResourceManager({ config }: { config: ResourceConfig }) 
                 ? "No matches for these filters."
                 : `Create your first ${config.singular} to see it on the website.`}
             </p>
-            <button onClick={openNew} className="mt-4 rounded-full bg-teal px-5 py-2.5 text-[11px] uppercase tracking-[0.14em] text-cream">
-              + New {config.singular}
+            <button
+              onClick={openNew}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-[11px] uppercase tracking-[0.14em] text-cream transition hover:bg-ink"
+            >
+              <PlusIcon className="h-3 w-3" />
+              <span>New {config.singular}</span>
             </button>
           </div>
         ) : (

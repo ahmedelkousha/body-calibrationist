@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Service } from "@/lib/types";
 import { formatPrice, safeImage } from "@/lib/utils";
+import { ArrowRightIcon } from "@/components/icons";
 
 export default function ServiceCard({ service }: { service: Service }) {
   return (
@@ -30,10 +31,10 @@ export default function ServiceCard({ service }: { service: Service }) {
         <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">{service.description}</p>
         <Link
           href={`/treatments/${service.slug}`}
-          className="mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-teal"
+          className="group/link mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-teal"
         >
-          Explore treatment
-          <span className="transition-transform group-hover:translate-x-1">→</span>
+          <span>Explore treatment</span>
+          <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-1" />
         </Link>
       </div>
     </article>

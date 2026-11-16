@@ -12,6 +12,7 @@ const navigation = [
   { name: "Blog", href: "/dashboard/blogs", icon: "M4.5 5.25h15M4.5 9.75h9.75M4.5 14.25h15M4.5 18.75h9.75" },
   { name: "Products", href: "/dashboard/products", icon: "M3.75 7.5 12 3l8.25 4.5v9L12 21l-8.25-4.5v-9Zm0 0L12 12m8.25-4.5L12 12m0 9v-9" },
   { name: "Inquiries", href: "/dashboard/inquiries", icon: "M3.75 5.25h16.5v13.5H3.75V5.25Zm0 1.5 8.25 6 8.25-6" },
+  { name: "Orders", href: "/dashboard/orders", icon: "M3 6.75A1.5 1.5 0 0 1 4.5 5.25h15A1.5 1.5 0 0 1 21 6.75v10.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.25V6.75Zm0 3h18m-18 3h18" },
   { name: "Services", href: "/dashboard/services", icon: "M12 3.75v16.5M3.75 12h16.5" },
   { name: "Events", href: "/dashboard/events", icon: "M6.75 3.75v3M17.25 3.75v3M3.75 8.25h16.5m-16.5 0v11.25h16.5V8.25M8.25 12.75h3v3h-3v-3Z" },
   { name: "Stories", href: "/dashboard/stories", icon: "M12 3.75l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17.15 6.8 19.85l1-5.8-4.3-4.1 5.9-.9L12 3.75Z" },
@@ -126,6 +127,7 @@ export default function Sidebar({ newInquiries = 0 }: { newInquiries?: number })
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
+                  target={item.href === "/" ? "_blank" : "_self"}
                   className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-cream/70 transition hover:bg-cream/10 hover:text-cream"
                 >
                   <svg className="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.4} stroke="currentColor">

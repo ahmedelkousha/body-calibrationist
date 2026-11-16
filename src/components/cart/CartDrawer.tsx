@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "./CartProvider";
 import { formatPrice, safeImage } from "@/lib/utils";
+import { MinusIcon, PlusIcon } from "@/components/icons";
 
 export default function CartDrawer() {
   const { lines, isOpen, closeCart, removeItem, setQuantity, subtotal, count, clear } = useCart();
@@ -93,18 +94,18 @@ export default function CartDrawer() {
                       <div className="flex items-center rounded-full border border-sand">
                         <button
                           onClick={() => setQuantity(line.id, line.quantity - 1)}
-                          className="px-3 py-1 text-ink-soft hover:text-ink"
+                          className="px-2.5 py-1.5 text-ink-soft hover:text-ink"
                           aria-label={`Decrease quantity of ${line.name}`}
                         >
-                          −
+                          <MinusIcon className="h-3 w-3" />
                         </button>
                         <span className="min-w-6 text-center text-sm">{line.quantity}</span>
                         <button
                           onClick={() => setQuantity(line.id, line.quantity + 1)}
-                          className="px-3 py-1 text-ink-soft hover:text-ink"
+                          className="px-2.5 py-1.5 text-ink-soft hover:text-ink"
                           aria-label={`Increase quantity of ${line.name}`}
                         >
-                          +
+                          <PlusIcon className="h-3 w-3" />
                         </button>
                       </div>
                       <span className="text-sm font-medium text-ink">

@@ -5,6 +5,7 @@ import type { Inquiry, InquiryStatus } from "@/lib/types";
 import { cn, formatRelative, initials } from "@/lib/utils";
 import { deleteResource, listResource, updateResource } from "@/lib/firebase/data";
 import { StatusBadge } from "./ui";
+import { RefreshIcon } from "@/components/icons";
 
 const tabs: { key: InquiryStatus | "all"; label: string }[] = [
   { key: "all", label: "All" },
@@ -22,7 +23,30 @@ export default function InquiryManager() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [toast, setToast] = useState("");
+
+  async function refreshData() {
+    setIsRefreshing(true);
+    try {
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 600));
+      const [rows] = await Promise.all([listResource("inquiries"), minDelay]);
+      setItems(rows);
+      setLoadError("");
+      setToast("Inquiries refreshed");
+      window.setTimeout(() => setToast(""), 2400);
+      if (!selectedId && rows.length > 0) {
+        setSelectedId(rows[0].id);
+        setNotes(rows[0].notes ?? "");
+      }
+    } catch {
+      setLoadError(
+        "Could not load inquiries. Check that you are signed in and that firestore.rules is deployed.",
+      );
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -138,12 +162,21 @@ export default function InquiryManager() {
   return (
     <div>
       {loadError && (
-        <p
+        <div
           role="alert"
-          className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800"
+          className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800"
         >
-          {loadError}
-        </p>
+          <p>{loadError}</p>
+          <button
+            type="button"
+            onClick={refreshData}
+            disabled={isRefreshing}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100/70 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-amber-900 transition hover:bg-amber-100 disabled:opacity-60"
+          >
+            <RefreshIcon className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+            <span>Try again</span>
+          </button>
+        </div>
       )}
       <div className="mt-8 flex flex-col gap-3 rounded-2xl border border-sand/60 bg-white/60 p-3 lg:flex-row lg:items-center">
         <div className="flex flex-wrap gap-1">
@@ -163,16 +196,29 @@ export default function InquiryManager() {
             </button>
           ))}
         </div>
-        <div className="relative flex-1 lg:max-w-xs lg:ml-auto">
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search messages…"
-            className="w-full rounded-xl border border-transparent bg-transparent py-2 pl-9 pr-3 text-sm outline-none placeholder:text-ink-soft/60 focus:border-sand"
-          />
-          <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" fill="none" viewBox="0 0 24 24" strokeWidth={1.4} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.2-5.2m0 0A7.5 7.5 0 1 0 5.2 5.2a7.5 7.5 0 0 0 10.6 10.6Z" />
-          </svg>
+        <div className="flex items-center gap-2 lg:ml-auto">
+          <div className="relative flex-1 lg:w-72">
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search messages…"
+              className="w-full rounded-xl border border-transparent bg-transparent py-2 pl-9 pr-3 text-sm outline-none placeholder:text-ink-soft/60 focus:border-sand"
+            />
+            <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" fill="none" viewBox="0 0 24 24" strokeWidth={1.4} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.2-5.2m0 0A7.5 7.5 0 1 0 5.2 5.2a7.5 7.5 0 0 0 10.6 10.6Z" />
+            </svg>
+          </div>
+          <button
+            type="button"
+            onClick={refreshData}
+            disabled={isRefreshing}
+            title="Refresh inquiries"
+            aria-label="Refresh inquiries"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-sand/70 bg-white/70 px-3.5 py-2 text-[11px] uppercase tracking-[0.14em] text-ink-soft transition hover:border-teal hover:text-teal disabled:opacity-60"
+          >
+            <RefreshIcon className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin text-teal")} />
+            <span className="hidden sm:inline">{isRefreshing ? "Refreshing…" : "Refresh"}</span>
+          </button>
         </div>
       </div>
 
