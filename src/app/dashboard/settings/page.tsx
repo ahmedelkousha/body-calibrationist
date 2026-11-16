@@ -1,34 +1,40 @@
 import Image from "next/image";
 import Link from "next/link";
-import ResetDataButton from "@/components/dashboard/ResetDataButton";
-import { hasFirebaseAdminConfig, hasFirebaseLoginConfig } from "@/lib/auth/config";
+import { ArrowRightIcon } from "@/components/icons";
+import { isFirebaseConfigured } from "@/lib/firebase/client";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Settings | Dashboard" };
 
 export default function SettingsPage() {
-  const firestoreConnected = hasFirebaseAdminConfig();
-  const authConnected = hasFirebaseLoginConfig();
+  const firestoreConnected = isFirebaseConfigured;
+  const authConnected = firestoreConnected;
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  const stripeConnected = Boolean(stripeKey);
+  const stripeMode = stripeKey?.startsWith("sk_live_") ? "Live mode" : "Test mode";
 
   const integrations = [
     {
       name: "Firebase Authentication",
       status: authConnected ? "Connected" : "Not configured",
       description: authConnected
-        ? "Dashboard sign-in uses Firebase email/password accounts. Sessions live in an httpOnly __session cookie and are verified with the Firebase Admin SDK on every dashboard and API request."
-        : "Add NEXT_PUBLIC_FIREBASE_API_KEY plus the Admin SDK credentials to .env.local, then create the studio user in Firebase Authentication. The dashboard is locked until then.",
+        ? "Dashboard sign-in uses the Firebase Web SDK (email & password) in the browser. The session is restored by the SDK on each visit, and Firestore Security Rules decide what a signed-in user may do."
+        : "Add NEXT_PUBLIC_FIREBASE_API_KEY and NEXT_PUBLIC_FIREBASE_PROJECT_ID to .env.local, then create the studio user in Firebase Authentication. The dashboard is locked until then.",
     },
     {
       name: "Firestore database",
       status: firestoreConnected ? "Connected" : "Not configured",
       description: firestoreConnected
-        ? "Content and enquiries are read from and written to Cloud Firestore through the Firebase Admin SDK. Direct browser access is denied by firestore.rules."
-        : "Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY, then run npm run seed:firestore to load seed/firestore-seed.json. There is no local database fallback.",
+        ? "The dashboard reads and writes Cloud Firestore directly from the browser through the Firebase Web SDK. Public pages are rendered on the server with the same SDK, so the site keeps its SEO and first paint. Your Firestore security rules allow signed-in studio users to manage content and anonymous visitors to read content and create an inquiry."
+        : "Add NEXT_PUBLIC_FIREBASE_API_KEY and NEXT_PUBLIC_FIREBASE_PROJECT_ID to .env.local, then run npm run seed:firestore to load seed/firestore-seed.json. There is no local database fallback.",
     },
     {
       name: "Stripe payments",
-      status: "Demo mode",
-      description:
-        "The checkout flow is built and logs orders as inquiries. Connect a verified Stripe account and swap the placeholder form for Stripe Elements or a Checkout session.",
+      status: stripeConnected ? stripeMode : "Not configured",
+      description: stripeConnected
+        ? "Product checkouts and treatment bookings create a Stripe Checkout Session on the Next.js server. Paid orders appear under Dashboard → Orders, where full or partial refunds can be issued to the original card. Orders and refunds live in Stripe, not Firestore."
+        : "Add STRIPE_SECRET_KEY to .env.local and restart the server. Until then the checkout buttons explain that online payment is unavailable and invite clients to contact the studio.",
     },
     {
       name: "Apple Pay",
@@ -86,9 +92,10 @@ export default function SettingsPage() {
           </dl>
           <Link
             href="/contact"
-            className="mt-5 inline-flex text-[10px] uppercase tracking-[0.16em] text-teal hover:text-ink"
+            className="group/link mt-5 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-teal hover:text-ink"
           >
-            View contact page →
+            <span>View contact page</span>
+            <ArrowRightIcon className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
           </Link>
         </section>
 
@@ -109,24 +116,7 @@ export default function SettingsPage() {
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-sand/60 bg-white/70 p-6 lg:col-span-12">
-          <h2 className="font-display text-xl text-ink">Content database</h2>
-          <p className="mt-2 max-w-2xl text-sm text-ink-soft">
-            {firestoreConnected
-              ? "This dashboard is connected to Cloud Firestore. Content and enquiries are saved in the Firebase project configured in .env.local."
-              : "Cloud Firestore is not configured yet. Add the Firebase Admin credentials to .env.local and restart the server."}
-          </p>
-          <div className="mt-4 flex flex-wrap items-center gap-4">
-            <ResetDataButton />
-            <p className="text-[11px] leading-relaxed text-ink-soft">
-              Resetting restores the demo content from{" "}
-              <code className="rounded bg-cream-deep px-1.5 py-0.5 text-[11px]">
-                seed/firestore-seed.json
-              </code>{" "}
-              in Firestore.
-            </p>
-          </div>
-        </section>
+        
       </div>
     </>
   );

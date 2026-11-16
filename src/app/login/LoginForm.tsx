@@ -1,26 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createSessionAction } from "./actions";
+import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
+import { getClientAuth, isFirebaseConfigured } from "@/lib/firebase/client";
 
 const FRIENDLY_ERRORS: Record<string, string> = {
-  EMAIL_NOT_FOUND: "No studio account uses that email address.",
-  INVALID_PASSWORD: "That password is not correct.",
-  INVALID_LOGIN_CREDENTIALS: "That email and password combination is not correct.",
-  INVALID_EMAIL: "Please enter a valid email address.",
-  MISSING_PASSWORD: "Please enter your password.",
-  USER_DISABLED: "This account has been disabled. Contact the studio owner.",
-  TOO_MANY_ATTEMPTS_TRY_LATER: "Too many attempts. Please wait a few minutes and try again.",
-  OPERATION_NOT_ALLOWED:
+  "auth/invalid-credential": "That email and password combination is not correct.",
+  "auth/wrong-password": "That password is not correct.",
+  "auth/user-not-found": "No studio account uses that email address.",
+  "auth/invalid-email": "Please enter a valid email address.",
+  "auth/missing-password": "Please enter your password.",
+  "auth/user-disabled": "This account has been disabled. Contact the studio owner.",
+  "auth/too-many-requests": "Too many attempts. Please wait a few minutes and try again.",
+  "auth/network-request-failed": "Could not reach Firebase. Check your connection and try again.",
+  "auth/operation-not-allowed":
     "Email/password sign-in is disabled in this Firebase project. Enable it under Authentication → Sign-in method.",
+  "auth/configuration-not-found":
+    "Firebase Authentication is not set up for this project. Enable Email/Password in the Firebase console.",
+  "auth/unauthorized-domain":
+    "This domain is not authorised for Firebase sign-in. Add it under Authentication → Settings → Authorized domains.",
+  "auth/invalid-api-key": "The Firebase web API key is not valid. Check NEXT_PUBLIC_FIREBASE_API_KEY.",
 };
 
 function messageFor(code: string): string {
   return FRIENDLY_ERRORS[code] ?? "We couldn't sign you in. Check your email and password and try again.";
 }
 
-export default function LoginForm({ apiKey, next }: { apiKey: string; next: string }) {
+function errorCode(caught: unknown): string {
+  if (caught && typeof caught === "object" && "code" in caught) {
+    return String((caught as { code?: unknown }).code ?? "");
+  }
+  return "";
+}
+
+export default function LoginForm({ next }: { next: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,44 +42,34 @@ export default function LoginForm({ apiKey, next }: { apiKey: string; next: stri
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // If the SDK already restores a session, skip the form entirely.
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+
+    return onAuthStateChanged(getClientAuth(), (user) => {
+      if (user) router.replace(next);
+    });
+  }, [router, next]);
+
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (busy) return;
+
+    if (!isFirebaseConfigured) {
+      setError(
+        "Firebase Authentication is not configured. Add NEXT_PUBLIC_FIREBASE_API_KEY and NEXT_PUBLIC_FIREBASE_PROJECT_ID to .env.local, then restart the dev server.",
+      );
+      return;
+    }
 
     setBusy(true);
     setError("");
 
     try {
-      const response = await fetch(
-        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${encodeURIComponent(apiKey)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: email.trim(),
-            password,
-            returnSecureToken: true,
-          }),
-        },
-      );
-
-      const data = (await response.json()) as {
-        idToken?: string;
-        error?: { message?: string };
-      };
-
-      if (!response.ok || !data.idToken) {
-        throw new Error(data.error?.message ?? "SIGN_IN_FAILED");
-      }
-
-      const session = await createSessionAction(data.idToken);
-      if (!session.ok) throw new Error(session.error);
-
+      await signInWithEmailAndPassword(getClientAuth(), email.trim(), password);
       router.replace(next);
-      router.refresh();
     } catch (caught) {
-      const raw = caught instanceof Error ? caught.message : "SIGN_IN_FAILED";
-      setError(messageFor(raw));
+      setError(messageFor(errorCode(caught)));
       setBusy(false);
     }
   }
@@ -131,8 +135,8 @@ export default function LoginForm({ apiKey, next }: { apiKey: string; next: stri
       </button>
 
       <p className="text-center text-[11px] leading-relaxed text-ink-soft">
-        Access is limited to studio accounts created in Firebase Authentication. Need access? Ask the studio owner to
-        add your email.
+        Sign-in is handled entirely by Firebase Authentication in your browser. Anyone with an account in this Firebase
+        project can open the dashboard, so keep the user list limited to studio staff.
       </p>
     </form>
   );

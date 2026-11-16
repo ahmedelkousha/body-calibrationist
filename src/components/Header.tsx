@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { cn } from "@/lib/utils";
+import { ArrowRightIcon } from "@/components/icons";
 
 const navigation = [
   { name: "Treatments", href: "/treatments" },
   { name: "Store", href: "/store" },
-  { name: "Journal", href: "/blog" },
+  { name: "Journal", href: "/blogs" },
   { name: "Our Approach", href: "/approach" },
   { name: "Workshops", href: "/workshops" },
   { name: "Stories", href: "/stories" },
@@ -51,9 +52,9 @@ export default function Header() {
             <Image src="/logo.jpg" alt="Shelley's" fill sizes="44px" className="object-cover" priority />
           </span>
           <span className="leading-none">
-            <span className="block font-display text-2xl tracking-wide text-ink">Shelley&apos;s</span>
-            <span className="mt-1 block text-[9px] uppercase tracking-[0.34em] text-ink-soft">
-              Skin &amp; Body Studio
+            {/* <span className="block font-display text-2xl tracking-wide text-ink">Shelley&apos;s</span> */}
+            <span className="mt-1 block text-teal italic text-sm uppercase tracking-[0.14em] text-ink-soft">
+             Body <br /> Calibrationist
             </span>
           </span>
         </Link>
@@ -152,9 +153,10 @@ export default function Header() {
             <Link
               href="/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className="mt-6 text-sm uppercase tracking-[0.16em] text-ink-soft"
+              className="mt-6 inline-flex items-center gap-1.5 text-sm uppercase tracking-[0.16em] text-ink-soft hover:text-teal"
             >
-              Management dashboard →
+              <span>Management dashboard</span>
+              <ArrowRightIcon className="h-3 w-3" />
             </Link>
           </div>
         </div>

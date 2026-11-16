@@ -1,16 +1,10 @@
-import { readDb } from "@/lib/db";
 import InquiryManager from "@/components/dashboard/InquiryManager";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Inquiries | Dashboard" };
 
-export default async function InquiriesPage() {
-  const db = await readDb();
-  const inquiries = [...db.inquiries].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  );
-
+export default function InquiriesPage() {
   return (
     <>
       <p className="text-[10px] uppercase tracking-[0.28em] text-gold">Client care</p>
@@ -19,7 +13,7 @@ export default async function InquiriesPage() {
         Every message from the website — enquiries, workshop bookings and store orders. Reply, archive and
         keep private notes here.
       </p>
-      <InquiryManager initialInquiries={inquiries} />
+      <InquiryManager />
     </>
   );
 }

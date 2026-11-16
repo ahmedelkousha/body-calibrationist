@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { readDb } from "@/lib/db";
+import { readContent } from "@/lib/firebase/data";
 import EventsList from "@/components/site/EventsList";
 import Reveal from "@/components/site/Reveal";
+import { PlusIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkshopsPage() {
-  const db = await readDb();
+  const db = await readContent();
   const events = db.events
     .filter((event) => event.status !== "past")
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -101,7 +102,7 @@ export default async function WorkshopsPage() {
                   <details key={item.q} className="group py-4">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-lg text-ink">
                       {item.q}
-                      <span className="text-gold transition group-open:rotate-45">+</span>
+                      <PlusIcon className="h-4 w-4 shrink-0 text-gold transition-transform duration-200 group-open:rotate-45" />
                     </summary>
                     <p className="mt-2 text-sm leading-relaxed text-ink-soft">{item.a}</p>
                   </details>

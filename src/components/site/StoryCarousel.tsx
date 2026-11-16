@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Story } from "@/lib/types";
 import StarRating from "./StarRating";
 import { cn, safeImage } from "@/lib/utils";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
 
 export default function StoryCarousel({ stories }: { stories: Story[] }) {
   const [index, setIndex] = useState(0);
@@ -94,14 +95,14 @@ export default function StoryCarousel({ stories }: { stories: Story[] }) {
               aria-label="Previous story"
               className="flex h-10 w-10 items-center justify-center rounded-full border border-sand text-ink-soft transition hover:border-teal hover:text-teal"
             >
-              ←
+              <ArrowLeftIcon className="h-4 w-4" />
             </button>
             <button
               onClick={() => go(index + 1)}
               aria-label="Next story"
               className="flex h-10 w-10 items-center justify-center rounded-full border border-sand text-ink-soft transition hover:border-teal hover:text-teal"
             >
-              →
+              <ArrowRightIcon className="h-4 w-4" />
             </button>
           </div>
         </div>

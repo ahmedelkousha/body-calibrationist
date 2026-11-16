@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { readDb } from "@/lib/db";
+import { readContent } from "@/lib/firebase/data";
 import StoreGrid from "@/components/site/StoreGrid";
 import Reveal from "@/components/site/Reveal";
 
@@ -18,7 +18,7 @@ const pledges = [
 ];
 
 export default async function StorePage() {
-  const db = await readDb();
+  const db = await readContent();
   const products = db.products.filter((product) => product.status === "active");
 
   return (

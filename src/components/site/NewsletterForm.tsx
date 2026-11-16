@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createInquiry } from "@/lib/firebase/data";
 
 export default function NewsletterForm() {
   const [email, setEmail] = useState("");
@@ -11,20 +12,14 @@ export default function NewsletterForm() {
     if (!email) return;
     setState("loading");
     try {
-      const response = await fetch("/api/inquiries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "Newsletter subscriber",
-          email,
-          phone: "",
-          subject: "Newsletter signup",
-          message: "Please add me to the monthly quiet letter.",
-          status: "new",
-          notes: "",
-        }),
+      await createInquiry({
+        name: "Newsletter subscriber",
+        email,
+        phone: "",
+        subject: "Newsletter signup",
+        message: "Please add me to the monthly quiet letter.",
+        notes: "",
       });
-      if (!response.ok) throw new Error("failed");
       setState("done");
       setEmail("");
     } catch {

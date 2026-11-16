@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Product } from "@/lib/types";
 import { useCart } from "@/components/cart/CartProvider";
+import { MinusIcon, PlusIcon } from "@/components/icons";
 
 export default function AddToCartButton({ product }: { product: Product }) {
   const { addItem } = useCart();
@@ -17,7 +18,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
           className="px-4 py-3 text-ink-soft transition hover:text-ink"
           aria-label="Decrease quantity"
         >
-          −
+          <MinusIcon className="h-3.5 w-3.5" />
         </button>
         <span className="min-w-8 text-center text-sm">{quantity}</span>
         <button
@@ -25,7 +26,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
           className="px-4 py-3 text-ink-soft transition hover:text-ink"
           aria-label="Increase quantity"
         >
-          +
+          <PlusIcon className="h-3.5 w-3.5" />
         </button>
       </div>
       <button

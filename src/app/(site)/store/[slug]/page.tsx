@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBySlug, readDb } from "@/lib/db";
+import { getBySlug, readCollection } from "@/lib/firebase/data";
 import { formatPrice, safeImage } from "@/lib/utils";
 import AddToCartButton from "@/components/site/AddToCartButton";
 import ProductCard from "@/components/site/ProductCard";
-import Markdown from "@/lib/markdown";
+import Markdown from "@/components/site/Markdown";
 import StarRating from "@/components/site/StarRating";
+import { ArrowRightIcon, PlusIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +30,8 @@ export default async function ProductPage({ params }: Props) {
   const product = await getBySlug("products", slug);
   if (!product || product.status !== "active") notFound();
 
-  const db = await readDb();
-  const related = db.products
+  const products = await readCollection("products");
+  const related = products
     .filter((item) => item.id !== product.id && item.status === "active")
     .slice(0, 3);
 
@@ -110,7 +111,7 @@ export default async function ProductPage({ params }: Props) {
             <details className="group py-4" open>
               <summary className="flex cursor-pointer list-none items-center justify-between font-display text-lg text-ink">
                 Details &amp; ingredients
-                <span className="text-gold transition group-open:rotate-45">+</span>
+                <PlusIcon className="h-3 w-3 shrink-0 text-gold transition-transform duration-200 group-open:rotate-45" />
               </summary>
               <div className="mt-3">
                 <Markdown content={product.details} className="text-sm leading-relaxed text-ink-soft" />
@@ -119,7 +120,7 @@ export default async function ProductPage({ params }: Props) {
             <details className="group py-4">
               <summary className="flex cursor-pointer list-none items-center justify-between font-display text-lg text-ink">
                 Shipping &amp; returns
-                <span className="text-gold transition group-open:rotate-45">+</span>
+                <PlusIcon className="h-3 w-3 shrink-0 text-gold transition-transform duration-200 group-open:rotate-45" />
               </summary>
               <p className="mt-3 text-sm leading-relaxed text-ink-soft">
                 Orders are packed Tuesday to Saturday and posted with tracking. If a product is not right for
@@ -130,7 +131,7 @@ export default async function ProductPage({ params }: Props) {
             <details className="group py-4">
               <summary className="flex cursor-pointer list-none items-center justify-between font-display text-lg text-ink">
                 How to use
-                <span className="text-gold transition group-open:rotate-45">+</span>
+                <PlusIcon className="h-3 w-3 shrink-0 text-gold transition-transform duration-200 group-open:rotate-45" />
               </summary>
               <p className="mt-3 text-sm leading-relaxed text-ink-soft">
                 Use a small amount on damp skin or after cleansing. For a slower ritual, warm between the
@@ -145,8 +146,12 @@ export default async function ProductPage({ params }: Props) {
       <section className="mx-auto max-w-7xl px-5 pb-20 sm:px-8">
         <div className="flex items-end justify-between gap-4">
           <h2 className="font-display text-3xl text-ink">Pairs well with</h2>
-          <Link href="/store" className="text-[11px] uppercase tracking-[0.16em] text-teal">
-            All products →
+          <Link
+            href="/store"
+            className="group/link inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-teal hover:text-ink"
+          >
+            <span>All products</span>
+            <ArrowRightIcon className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
           </Link>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-3">

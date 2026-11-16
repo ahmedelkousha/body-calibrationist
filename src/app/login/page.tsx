@@ -1,12 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import {
-  getFirebaseClientConfig,
-  hasFirebaseAdminConfig,
-  hasFirebaseLoginConfig,
-} from "@/lib/auth/config";
-import { getSession } from "@/lib/auth/session";
+import { ArrowLeftIcon } from "@/components/icons";
+import { isFirebaseConfigured } from "@/lib/firebase/client";
 import LoginForm from "./LoginForm";
 
 export const dynamic = "force-dynamic";
@@ -30,23 +25,15 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ next?: string }>;
 }) {
-  const user = await getSession();
   const params = await searchParams;
   const next = safeNext(params.next);
+  const clientConfig = isFirebaseConfigured;
 
-  if (user) redirect(next);
-
-  const loginReady = hasFirebaseLoginConfig();
-  const clientConfig = getFirebaseClientConfig();
-  const adminReady = hasFirebaseAdminConfig();
-
+  // The browser session is restored by the Firebase SDK, so there is no server
+  // session to check here. LoginForm redirects if a user is already signed in.
   const missing = [
     !envValue("NEXT_PUBLIC_FIREBASE_API_KEY") && "NEXT_PUBLIC_FIREBASE_API_KEY",
-    !envValue("NEXT_PUBLIC_FIREBASE_PROJECT_ID") &&
-      !envValue("FIREBASE_PROJECT_ID") &&
-      "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
-    !envValue("FIREBASE_CLIENT_EMAIL") && "FIREBASE_CLIENT_EMAIL",
-    !envValue("FIREBASE_PRIVATE_KEY") && "FIREBASE_PRIVATE_KEY",
+    !envValue("NEXT_PUBLIC_FIREBASE_PROJECT_ID") && "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
   ].filter(Boolean) as string[];
 
   return (
@@ -105,18 +92,18 @@ export default async function LoginPage({
           <p className="text-[10px] uppercase tracking-[0.28em] text-gold">Dashboard access</p>
           <h2 className="mt-2 font-display text-4xl text-ink">Welcome back</h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            {loginReady
-              ? "Sign in with your Shelley's studio account."
+            {clientConfig
+              ? "Sign in with your Shelley's studio account. Firebase handles the password check in your browser."
               : "Firebase Authentication is not connected yet. Add the values below to enable sign-in."}
           </p>
 
-          {loginReady && clientConfig ? (
-            <LoginForm apiKey={clientConfig.apiKey} next={next} />
+          {clientConfig ? (
+            <LoginForm next={next} />
           ) : (
             <div className="mt-8 rounded-2xl border border-sand/80 bg-white/70 p-5">
               <h3 className="font-display text-xl text-ink">Finish the Firebase setup</h3>
               <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">
-                Sign-in uses Firebase Authentication (email &amp; password). Add these values to{" "}
+                Sign-in uses the Firebase Web SDK (email &amp; password). Add these values to{" "}
                 <code className="rounded bg-cream-deep px-1.5 py-0.5 text-[11px] text-ink">.env.local</code>, then restart
                 the dev server:
               </p>
@@ -125,8 +112,6 @@ export default async function LoginPage({
                 {[
                   "NEXT_PUBLIC_FIREBASE_API_KEY",
                   "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
-                  "FIREBASE_CLIENT_EMAIL",
-                  "FIREBASE_PRIVATE_KEY",
                 ].map((name) => {
                   const pending = missing.includes(name);
                   return (
@@ -147,19 +132,22 @@ export default async function LoginPage({
               </ul>
 
               <p className="mt-4 text-[11px] leading-relaxed text-ink-soft">
-                {adminReady
-                  ? "Firestore is already connected with the Admin SDK. Add the public API key above to enable the sign-in form."
-                  : "The dashboard stays locked until every value above is set. There is no local database fallback."}
+                The dashboard needs only the public web values. The Admin SDK credentials are still used for the
+                server-rendered public pages and the sitemap. There is no local database fallback.
               </p>
             </div>
           )}
 
           <div className="mt-10 flex items-center justify-between border-t border-sand/70 pt-5">
-            <Link href="/" className="text-[10px] uppercase tracking-[0.16em] text-ink-soft transition hover:text-teal">
-              ← Back to website
+            <Link
+              href="/"
+              className="group/link inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-ink-soft transition hover:text-teal"
+            >
+              <ArrowLeftIcon className="h-3 w-3 transition-transform group-hover/link:-translate-x-0.5" />
+              <span>Back to website</span>
             </Link>
             <span className="text-[10px] uppercase tracking-[0.16em] text-ink-soft/60">
-              {adminReady ? "Firestore connected" : "Firebase not configured"}
+              {clientConfig ? "Firebase Web SDK" : "Firebase not configured"}
             </span>
           </div>
         </div>

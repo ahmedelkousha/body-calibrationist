@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { hasFirebaseAdminConfig } from "@/lib/auth/config";
-
+import { isFirebaseConfigured } from "@/lib/firebase/client";
 export const dynamic = "force-dynamic";
 
 function FirebaseSetupNotice() {
@@ -51,7 +50,7 @@ function FirebaseSetupNotice() {
 }
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
-  if (!hasFirebaseAdminConfig()) {
+  if (!isFirebaseConfigured) {
     return <FirebaseSetupNotice />;
   }
 

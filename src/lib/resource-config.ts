@@ -90,7 +90,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
     searchKeys: ["title", "category", "author"],
     filterKey: "status",
     filterOptions: ["published", "draft"],
-    publicBase: "/blog",
+    publicBase: "/blogs",
     defaults: {
       title: "",
       excerpt: "",
